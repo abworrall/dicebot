@@ -9,12 +9,12 @@ import(
 	"time"
 
 	"github.com/abworrall/dicebot/pkg/bot"
+	"github.com/abworrall/dicebot/pkg/verbs"
 )
 
 func init() {
 	http.HandleFunc("/debug", debugHandler)
-
-	registerLineHandlerFor("/line")
+	registerLineHandlerFor("/line", os.Getenv("GOOGLE_CLOUD_PROJECT"))
 }
 
 
@@ -34,7 +34,9 @@ func req2ctx(r *http.Request) context.Context {
 }
 
 func debugHandler(w http.ResponseWriter, r *http.Request) {
-	str := bot.Process("some-user", r.FormValue("q"))
+	vc := verbs.VerbContext{User: "DEADBEEF"}
+	b := bot.New("dicebot", "db")
+	str := b.ProcessLine(vc, r.FormValue("q"))
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte(fmt.Sprintf("OK!\ndicebot debug handler\nin  [%s]\nout [%s]\n", r.FormValue("q"), str)))
