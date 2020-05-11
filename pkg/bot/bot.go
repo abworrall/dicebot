@@ -29,15 +29,15 @@ func (b Bot)ProcessLine(vc verbs.VerbContext, in string) string {
 	w := sanitizeLine(in)
 
 	if _,exists := b.nicknames[w[0]]; !exists { return "" }
-	if len(w) < 2 { return "<b>Yo</b>" }
+	if len(w) < 2 { return "Yo" }
 
 	return verbs.Act(vc, w[1], w[2:])
 }
 
 
 func sanitizeLine(in string) ([]string) {
-	// Sanitize: remove punctuation, trim space, lowercase
-	sanitized := strings.ToLower(regexp.MustCompile(`([^-_a-zA-Z0-9 ])`).ReplaceAllString(in, ""))
+	// Sanitize: remove punctuation, trim space, lowercase. Allow %, for fomat string entry
+	sanitized := strings.ToLower(regexp.MustCompile(`([^-_%a-zA-Z0-9 ])`).ReplaceAllString(in, ""))
 
 	return strings.Fields(sanitized) // Also trims space
 }

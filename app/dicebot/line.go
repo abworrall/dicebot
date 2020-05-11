@@ -1,6 +1,7 @@
 package main
 
 import(
+	"fmt"
 	"log"
 	"net/http"
 
@@ -41,9 +42,11 @@ func registerLineHandlerFor(url string, gcpProjectId string) {
 				Ctx: ctx,
 				StateManager: NewGcpStateManager(ctx, gcpProjectId),
 			}
-			if ev.Source.Type == linebot.EventSourceTypeUser {
-				vc.User = ev.Source.UserID
+			switch ev.Source.Type {
+			case linebot.EventSourceTypeUser:  vc.User = ev.Source.UserID
+			case linebot.EventSourceTypeGroup: vc.User = ev.Source.UserID
 			}
+			vc.Debug = fmt.Sprintf("event<%T>: %#v\n\n", ev, ev)
 
 			switch msg := ev.Message.(type) {
 			case *linebot.TextMessage:

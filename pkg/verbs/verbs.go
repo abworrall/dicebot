@@ -12,16 +12,16 @@ func init() {
 	HandleVerb("save",    SavingThrow{})
 	HandleVerb("roll",    Roll{})
 	HandleVerb("party",  &Party{})
-	//HandleVerb("s",      &Stateful{})
+	HandleVerb("insult", &Insult{})
 }
-
 
 type VerbContext struct {
 	Ctx           context.Context
 	StateManager
-	
+
 	// Request specific fields
 	User          string
+	Debug         string
 }
 
 // A Verber will respond to a bot command
@@ -74,7 +74,9 @@ func Help() string {
 
 	str := "I can:\n"
 	for _,k := range keys {
-		str += fmt.Sprintf("- %s %s\n", k, verbs[k].Help())
+		if help := verbs[k].Help(); help != "" {
+			str += fmt.Sprintf("- db %s %s\n", k, help)
+		}
 	}
 	return str
 }

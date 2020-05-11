@@ -16,7 +16,7 @@ type Party struct{
 }
 
 func (p *Party)Help() string {
-	return "[claim NAME] [delete NAME] [add NAME stats...]"
+	return "" // "[claim NAME] [delete NAME] [add NAME stats...]"
 }
 
 func (p *Party)String() string {
@@ -30,6 +30,7 @@ func (p *Party)String() string {
 	for _,k := range keys {
 		str += fmt.Sprintf("%s\n", p.Characters[k])
 	}
+
 	return str
 }
 
@@ -48,6 +49,7 @@ func (p *Party)Process(vc VerbContext, args []string) string {
 	case "add": return p.Add(args[1:])
 	case "delete": return p.Delete(args[1])
 	case "claim": return p.Claim(vc, args[1])
+	case "debug": return p.Debug(vc)
 	default: return "party's over"
 	}
 
@@ -59,8 +61,12 @@ func (p *Party)Claim(vc VerbContext, name string) string {
 		p.UserIds = map[string]string{}
 	}
 
-	p.UserIds[vc.User] = name
-	return fmt.Sprintf("%s has been claimed by %s", name, vc.User)
+	//	if _,exists := p.UserIds[vc.User]; !exists {
+		p.UserIds[vc.User] = name
+		return fmt.Sprintf("%s has been claimed by %s", name, vc.User)
+	//	} else {
+	//		return fmt.Sprintf("naughty ! %s has already been claimed", name)
+	//	}
 }
 
 func (p *Party)Delete(name string) string {
@@ -98,4 +104,11 @@ func (p *Party)Add(args []string) string {
 	p.Characters[c.Name] = c
 	
 	return fmt.Sprintf("%s has joined the party", c.Name)
+}
+
+func (p *Party)Debug(vc VerbContext) string {
+	str := fmt.Sprintf("vc: %#v\n\n", vc)
+	str += fmt.Sprintf("userids: %#v\n\n", p.UserIds)
+	//str += fmt.Sprintf("characters: %#v\n\n", p.Characters)
+	return str
 }
