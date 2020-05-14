@@ -10,7 +10,7 @@ type Insult struct{
 	Insults []string
 }
 
-func (i *Insult)Help() string { return "insult [user] [learn user is a limpet]" }
+func (i *Insult)Help() string { return "[user] [learn user is a limpet]" }
 
 func (i *Insult)Process(vc VerbContext, args []string) string {
 	if len(args) == 0 { return i.Help() }

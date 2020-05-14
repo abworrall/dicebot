@@ -16,12 +16,12 @@ type Character struct {
 	MaxHitpoints int
 	CurrHitpoints int
 
-	Inventory *Inventory
+	Inventory
 }
 
 func NewCharacter() Character {
 	return Character{
-		Inventory: &Inventory{
+		Inventory: Inventory{
 			Items: []Item{},
 		},
 	}

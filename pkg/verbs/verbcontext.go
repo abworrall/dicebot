@@ -6,6 +6,7 @@ import(
 	"log"
 
 	"github.com/abworrall/dicebot/pkg/character"
+	"github.com/abworrall/dicebot/pkg/config"
 )
 
 type VerbContext struct {
@@ -14,6 +15,7 @@ type VerbContext struct {
 
 	// State we prepopulate, to be helpful. Breaks layering.
 	Character      *character.Character
+	MasqueradeAs    string // User we want to masquerade as
 	
 	// Request specific fields
 	ExternalUserId  string // External systems provide their own IDs
@@ -32,6 +34,11 @@ func (vc *VerbContext)Setup() {
 
 	vc.User = bs.NameClaims[vc.ExternalUserId] // will be nil if they have no claim
 
+	if vc.MasqueradeAs != "" && vc.User == config.Get("adminuser") {
+		vc.User = vc.MasqueradeAs
+		log.Printf("[masquerading as %s]\n", vc.MasqueradeAs)
+	}
+	
 	if vc.User == "" { return }
 
 	// FIXME: Something for unknown users ?
@@ -46,18 +53,19 @@ func (vc *VerbContext)Teardown() {
 
 func (vc *VerbContext)loadCharacter() {
 	c := character.NewCharacter()
+	vc.Character = &c
 
 	if vc.User == "" {
 		return
 	} else if err := vc.StateManager.ReadState(vc.Ctx, vc.characterStateName(), &c); err != nil {
+		// This will happen on the first ever read of a new character
 		log.Printf("ReadState(%s): %v", vc.characterStateName(), err)
 		return
 	}
-
-	vc.Character = &c
 }
 
 func (vc *VerbContext)maybeSaveCharacter() {
+	// FIXME: ideally this would check for changes before writing the character
 	if vc.User == "" || vc.Character == nil {
 		return
 	} else if err := vc.StateManager.WriteState(vc.Ctx, vc.characterStateName(), vc.Character); err != nil {

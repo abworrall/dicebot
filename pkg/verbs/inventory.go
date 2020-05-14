@@ -13,34 +13,33 @@ func (i Inventory)Help() string { return "[stash item] [list] [remove N] [use N]
 
 func (i Inventory)Process(vc VerbContext, args []string) string {
 	if len(args) < 1 { return i.Help() }
-	
-	inv := vc.Character.Inventory
-	inv.MaybeInit() // FIXME: this maybeinit is getting way out of hand
+
+	c := vc.Character
 	
 	switch args[0] {
 	case "-flush":
-		inv.Clear()
+		c.Inventory.Clear()
 		
+	case "list":
+		return c.Inventory.String()
+
 	case "stash":
 		if len(args) == 1 { return "what do you want to stash, eh ?" }
-		inv.Append(strings.Join(args[1:], " "))
+		c.Inventory.Append(strings.Join(args[1:], " "))
 		return "item stashed"
 
-	case "list":
-		return inv.String()
-
-	case "use":
-		if n,str := inv.ParseIndex(args[1:]); str != "" {
+	case "remove":
+		if n,str := c.Inventory.ParseIndex(args[1:]); str != "" {
 			return str
 		} else {
-			return fmt.Sprintf("%s uses their %s\n", vc.User, inv.Items[n])
+			c.Inventory.Remove(n)
 		}
 
-	case "remove":
-		if n,str := inv.ParseIndex(args[1:]); str != "" {
+	case "use":
+		if n,str := c.Inventory.ParseIndex(args[1:]); str != "" {
 			return str
 		} else {
-			inv.Remove(n)
+			return fmt.Sprintf("%s uses their %s\n", vc.User, c.Inventory.Items[n])
 		}
 
 	default:

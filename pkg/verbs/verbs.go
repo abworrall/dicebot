@@ -9,24 +9,23 @@ import(
 )
 
 func init() {
-	HandleVerb("bot",    &BotSetup{}) // Needed; provides data objects that are used by framework
+	// Always needed; provides data objects that are used by framework
+	HandleVerb("bot",    &BotSetup{})
 
 	// Per-character verbs (use state in context)
 	HandleVerb("hp",      HitPoints{})
 	HandleVerb("char",    Character{})
-	HandleVerb("inv",    &Inventory{})
-
+	HandleVerb("inv",     Inventory{})
 	HandleVerb("save",    SavingThrow{})
 	HandleVerb("roll",    Roll{})
 	
 	// Verbs with explicit state (not part of character objects)
-	HandleVerb("i",      &IWillActions{})
+	HandleVerb("vow",    &Vows{})
 	HandleVerb("insult", &Insult{})
 }
 
 // A Verber will respond to a bot command
 type Verber interface {
-	// MaybeInit()
 	Process(c VerbContext, args []string) string
 	Help() string
 }
@@ -88,13 +87,18 @@ func Act(vc VerbContext, v string, args []string) string {
 	stateName := v+"-state"
 	if v == "help" { return Help() }
 
+	// Masquerading - command will start with "as userblah ". Permissions verified in `vc.Setup`.
+	if v == "as" && len(args) > 1 {
+		vc.MasqueradeAs, v, args = args[0], args[1], args[2:]
+	}
+
+	vc.Setup()
+	
 	vr,exists := verbs[v]
 	if !exists {
 		return fmt.Sprintf("I don't `%s`", v)
 	}
 
-	vc.Setup()
-	
 	if IsStateful(vr) {
 		if vc.StateManager != nil {
 			if err := vc.StateManager.ReadState(vc.Ctx, stateName, vr); err != nil {

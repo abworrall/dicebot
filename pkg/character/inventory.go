@@ -4,7 +4,6 @@ import(
 	"fmt"
 	"strconv"
 	"time"
-	"log"
 )
 
 type Inventory struct {
@@ -28,35 +27,22 @@ func (i *Inventory)String() string {
 	return str
 }
 
-func (i *Inventory)MaybeInit() {
-	if i.Items == nil {
-		log.Printf("MaybeInit\n")
-		i.Items = []Item{}
-	}
-}
-
 func (i *Inventory)Clear() {
 	i.Items = []Item{}
 }
 
 func (i *Inventory)Append(desc string) {
-	i.MaybeInit()
-
 	i.Items = append(i.Items, Item{time.Now(), desc} )
-	log.Printf("Yes, appended %s\n%s", desc, i)
 }
 
-// Arg is zero-indexed
+// Arg `n` is zero-indexed
 func (i *Inventory)Remove(n int) {
-	i.MaybeInit()
 	if n<0 || n>=len(i.Items) { return }
 	i.Items = append(i.Items[:n], i.Items[n+1:]...)
 }
 
-
+// Returns a 0-indexed, range-checked index for the slice - or an error
 func (i *Inventory)ParseIndex(args []string) (int, string) {
-	i.MaybeInit()
-
 	if len(args) == 0 {
 		return -1, "wat"
 	} else if n,err := strconv.Atoi(args[0]); err != nil {
