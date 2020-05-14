@@ -20,7 +20,7 @@ func (i *Insult)Process(vc VerbContext, args []string) string {
 	}
 	
 	switch args[0] {
-	case "flush":
+	case "-flush":
 		i.Insults = []string{}
 		
 	case "learn":
@@ -30,7 +30,8 @@ func (i *Insult)Process(vc VerbContext, args []string) string {
 		
 	default:
 		str := i.Insults[rand.Intn(len(i.Insults))]
-		str = regexp.MustCompile(`\buser\b`).ReplaceAllString(str, args[0])
+		target := strings.Join(args, " ")
+		str = regexp.MustCompile(`\buser\b`).ReplaceAllString(str, target)
 		return str
 	}
 

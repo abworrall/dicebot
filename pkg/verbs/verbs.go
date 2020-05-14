@@ -9,23 +9,24 @@ import(
 )
 
 func init() {
+	HandleVerb("bot",    &BotSetup{}) // Needed; provides data objects that are used by framework
+
+	// Per-character verbs (use state in context)
+	HandleVerb("hp",      HitPoints{})
+	HandleVerb("char",    Character{})
+	HandleVerb("inv",    &Inventory{})
+
 	HandleVerb("save",    SavingThrow{})
 	HandleVerb("roll",    Roll{})
-	HandleVerb("party",  &Party{})
+	
+	// Verbs with explicit state (not part of character objects)
+	HandleVerb("i",      &IWillActions{})
 	HandleVerb("insult", &Insult{})
-}
-
-type VerbContext struct {
-	Ctx           context.Context
-	StateManager
-
-	// Request specific fields
-	User          string
-	Debug         string
 }
 
 // A Verber will respond to a bot command
 type Verber interface {
+	// MaybeInit()
 	Process(c VerbContext, args []string) string
 	Help() string
 }
@@ -92,6 +93,8 @@ func Act(vc VerbContext, v string, args []string) string {
 		return fmt.Sprintf("I don't `%s`", v)
 	}
 
+	vc.Setup()
+	
 	if IsStateful(vr) {
 		if vc.StateManager != nil {
 			if err := vc.StateManager.ReadState(vc.Ctx, stateName, vr); err != nil {
@@ -112,17 +115,7 @@ func Act(vc VerbContext, v string, args []string) string {
 		}
 	}
 
+	vc.Teardown()
+	
 	return resp
-}
-
-// Other verbs need access to the party info, so here is a helper to hide the details.
-func LoadParty(vc VerbContext) *Party {
-	stateName := "party-state"
-	p := Party{}
-
-	if err := vc.StateManager.ReadState(vc.Ctx, stateName, &p); err != nil {
-		log.Printf("ReadState(%s): %v", stateName, err)
-	}
-
-	return &p
 }

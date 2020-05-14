@@ -43,8 +43,8 @@ func registerLineHandlerFor(url string, gcpProjectId string) {
 				StateManager: NewGcpStateManager(ctx, gcpProjectId),
 			}
 			switch ev.Source.Type {
-			case linebot.EventSourceTypeUser:  vc.User = ev.Source.UserID
-			case linebot.EventSourceTypeGroup: vc.User = ev.Source.UserID
+			case linebot.EventSourceTypeUser:  vc.ExternalUserId = ev.Source.UserID
+			case linebot.EventSourceTypeGroup: vc.ExternalUserId = ev.Source.UserID
 			}
 			vc.Debug = fmt.Sprintf("event<%T>: %#v\n\n", ev, ev)
 

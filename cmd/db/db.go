@@ -12,7 +12,7 @@ import(
 func main() {
 	b := bot.New("dicebot", "db", "snakeeyes")
 	vc := verbs.VerbContext{
-		User: "ABCDEF123456",
+		ExternalUserId: "ABCDEF123456",
 		StateManager: FileStateManager{"/home/abw/db-state"},
 	}
 	reader := bufio.NewReader(os.Stdin)
