@@ -28,23 +28,30 @@ func NewCharacter() Character {
 }
 
 func (c Character)String() string {
-	s := fmt.Sprintf(`-- %s
-STR: %2d   Race: %s
-INT: %2d   Class: %s (%d)
-WIS: %2d   Alignment: %s
+	s := fmt.Sprintf(`--{ %s }--
+Race: %s
+Class: %s (%d)
+Alignment: %s
+
+STR: %2d
+INT: %2d
+WIS: %2d
 CON: %2d
-CHA: %2d   HP: (%d/%d)
+CHA: %2d
 DEX: %2d
 PER: %2d
+
+HP: (%d/%d)
 `,
-		c.Name,
-		c.Str, c.Race,
-		c.Int, c.Class, c.Level,
-		c.Wis, c.Alignment,
+		c.Name, c.Race, c.Class, c.Level, c.Alignment,
+		c.Str,
+		c.Int,
+		c.Wis,
 		c.Con,
-		c.Cha, c.CurrHitpoints, c.MaxHitpoints,
+		c.Cha,
 		c.Dex,
-		c.Per)
+		c.Per,
+		c.CurrHitpoints, c.MaxHitpoints)
 	return s
 }
 

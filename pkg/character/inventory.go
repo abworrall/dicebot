@@ -20,6 +20,10 @@ func (a Item)String() string {
 }
 
 func (i *Inventory)String() string {
+	if len(i.Items) == 0 {
+		return "inventory empty!"
+	}
+
 	str := ""
 	for j,item := range i.Items {
 		str += fmt.Sprintf("[%02d] %s\n", j+1, item)
