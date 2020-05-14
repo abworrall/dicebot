@@ -46,10 +46,12 @@ func registerLineHandlerFor(url string, gcpProjectId string) {
 			case linebot.EventSourceTypeUser:  vc.ExternalUserId = ev.Source.UserID
 			case linebot.EventSourceTypeGroup: vc.ExternalUserId = ev.Source.UserID
 			}
-			vc.Debug = fmt.Sprintf("event<%T>: %#v\n\n", ev, ev)
+			vc.Debug = fmt.Sprintf("ev<%T>: %#v\n\nsrc<%T>: %#v\n\n", ev, ev, *ev.Source, *ev.Source)
 
 			switch msg := ev.Message.(type) {
 			case *linebot.TextMessage:
+				vc.Debug += fmt.Sprintf("msg<%T>: %#v\n\n", msg, msg)
+
 				if respText := db.ProcessLine(vc, msg.Text); respText != "" {
 					if _,err := bot.ReplyMessage(ev.ReplyToken, linebot.NewTextMessage(respText)).Do(); err != nil {
 						log.Printf("bot.ReplyMessage: %v", err)
