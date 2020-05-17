@@ -4,24 +4,37 @@ import(
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/abworrall/dicebot/pkg/character"
 	"github.com/abworrall/dicebot/pkg/config"
 )
 
+// VerbContext is passed by value to all the various verbs. If any
+// fields are to be mutated by verbs, they need to be pointers, and be
+// initialized during `Setup`.
+
 type VerbContext struct {
 	Ctx           context.Context
 	StateManager
 
-	// State we prepopulate, to be helpful. Breaks layering.
+	// State we prepopulate, to be helpful
 	Character      *character.Character
 	MasqueradeAs    string // User we want to masquerade as
 	
 	// Request specific fields
 	ExternalUserId  string // External systems provide their own IDs
 	User            string // This should be the bot's nickname for the user
+
+	Events       *[]Event  // Basically an audit log, that we shorhorn into the History verb
 	Debug           string
 }
+
+// LogEvent should be used by verbs when they want to put things in the Log Of Record.
+func (vc *VerbContext)LogEvent(description string) {
+	*vc.Events = append(*vc.Events, Event{"", time.Now(), vc.User, description})
+}
+
 
 // Populate pulls in  all the interesting information for this user, and
 // puts it in the context ready for the verb to use.
@@ -31,6 +44,8 @@ func (vc *VerbContext)Setup() {
 		log.Printf("ReadState(%s): %v", name, err)
 		return
 	}
+
+	vc.Events = &[]Event{}
 
 	vc.User = bs.NameClaims[vc.ExternalUserId] // will be nil if they have no claim
 
@@ -48,8 +63,24 @@ func (vc *VerbContext)Setup() {
 
 func (vc *VerbContext)Teardown() {
 	vc.maybeSaveCharacter()
-}
+	
+	if len(*vc.Events) > 0 {
+		stateName := "history-state" // FIXME: need a better way to identify singletons
+		h := NewHistory()
 
+		if err := vc.StateManager.ReadState(vc.Ctx, stateName, &h); err != nil {
+			// FIXME: breaks layering; we're loading a verb's state
+			log.Printf("ReadState(%s): %v", stateName, err)
+			return
+		}
+
+		h.Events = append (h.Events, *vc.Events...)
+
+		if err := vc.StateManager.WriteState(vc.Ctx, stateName, &h); err != nil {
+			log.Printf("%T.WriteState(%s, %T): %v\n", vc.StateManager, stateName, vc.Character, err)
+		}
+	}
+}
 
 func (vc *VerbContext)loadCharacter() {
 	c := character.NewCharacter()

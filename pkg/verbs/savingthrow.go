@@ -41,6 +41,9 @@ func (st SavingThrow)Process(vc VerbContext, args []string) string {
 		modStr = fmt.Sprintf(" with modifier %d", modifier)
 	}
 
+	vc.LogEvent(fmt.Sprintf("saved vs %s[%2d]%s: got %2d, %s", kind, val, modStr, x, outcome))
+
 	str := fmt.Sprintf("%s, save vs %s[%2d]%s: you rolled %2d, %s", vc.User, kind, val, modStr, x, outcome)
+
 	return str
 }

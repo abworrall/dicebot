@@ -9,19 +9,20 @@ import(
 )
 
 func init() {
-	// Always needed; provides data objects that are used by framework
-	HandleVerb("bot",    &BotSetup{})
+	// These verbs are always needed; provides data objects that are used by framework
+	HandleVerb("bot",     &BotSetup{})
+	HandleVerb("history", &History{})
 
 	// Per-character verbs (use state in context)
-	HandleVerb("hp",      HitPoints{})
-	HandleVerb("char",    Character{})
-	HandleVerb("inv",     Inventory{})
-	HandleVerb("save",    SavingThrow{})
-	HandleVerb("roll",    Roll{})
+	HandleVerb("hp",       HitPoints{})
+	HandleVerb("char",     Character{})
+	HandleVerb("inv",      Inventory{})
+	HandleVerb("save",     SavingThrow{})
+	HandleVerb("roll",     Roll{})
 	
 	// Verbs with explicit state (not part of character objects)
-	HandleVerb("vow",    &Vows{})
-	HandleVerb("insult", &Insult{})
+	HandleVerb("vow",     &Vows{})
+	HandleVerb("insult",  &Insult{})
 }
 
 // A Verber will respond to a bot command

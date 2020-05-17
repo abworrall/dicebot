@@ -9,19 +9,16 @@ import(
 // found in the context
 type Inventory struct {}
 	
-func (i Inventory)Help() string { return "[stash item] [list] [remove N] [use N]" }
+func (i Inventory)Help() string { return "[stash foo bar] [remove N] [use N]" }
 
 func (i Inventory)Process(vc VerbContext, args []string) string {
-	if len(args) < 1 { return i.Help() }
-
 	c := vc.Character
-	
+
+	if len(args) < 1 { return c.Inventory.String() }
+
 	switch args[0] {
 	case "-flush":
 		c.Inventory.Clear()
-		
-	case "list":
-		return c.Inventory.String()
 
 	case "stash":
 		if len(args) == 1 { return "what do you want to stash, eh ?" }
@@ -39,6 +36,7 @@ func (i Inventory)Process(vc VerbContext, args []string) string {
 		if n,str := c.Inventory.ParseIndex(args[1:]); str != "" {
 			return str
 		} else {
+			vc.LogEvent(fmt.Sprintf("uses their %s", c.Inventory.Items[n]))
 			return fmt.Sprintf("%s uses their %s\n", vc.User, c.Inventory.Items[n])
 		}
 

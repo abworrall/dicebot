@@ -1,0 +1,9 @@
+package config
+
+func init() {
+	Set("adminuser",          "dm") // The claimed name that grants root privs
+	
+	// Details from your LINE Business Account
+	Set("line.channeltoken",  "")
+	Set("line.channelsecret", "")
+}

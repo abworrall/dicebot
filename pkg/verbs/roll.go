@@ -14,7 +14,7 @@ func (r Roll)Help() string {
 	return "4d6"
 }
 
-func (r Roll)Process(c VerbContext, args []string) string {
+func (r Roll)Process(vc VerbContext, args []string) string {
 	if len(args) < 1 {
 		return "what do you want me to roll ?"
 	}
@@ -47,5 +47,8 @@ func (r Roll)Process(c VerbContext, args []string) string {
 	} else {
 		str += fmt.Sprintf("[%s]  total:%d", strings.Join(results, ","), total)
 	}
+
+	vc.LogEvent("rolled " + str)
+
 	return str
 }
