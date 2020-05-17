@@ -22,7 +22,7 @@ To get the bot running inside your LINE groups, you'll need to:
 * `mv ./pkg/config/myconfig.sample ./pkg/config/myconfig.go`
 * edit the new file, putting in your secret & token
 * deploy the app
-* update your LINE biz acount config, point it to your new webhook (`https://host/line` - the `host` is your new appenginer service URL)
+* update your LINE biz acount config, point it to your new webhook (`https://host/line` - the `host` is your new appengine service URL)
 
 The main verb is `roll`, for rolling dice. There are some other verbs
 that help out with running an RPG in a chat group:
@@ -42,3 +42,16 @@ db inv use 2               # assert you will use item #2
 db vow to eat less         # make a vow to do something
 db history                 # review a log of important events
 ```
+
+## Misc notes
+
+On LINE, it needs to maintain a mapping between the LINE user IDs and
+the names that identify characters. The easiest way is to get users to
+claim their name once they're logged into LINE: `db bot claim NAME`.
+Note that they can't use the high privacy modes, as they result in all
+user IDs being stripped out before the bot sees anything.
+
+If you are an admin user (see `./config/myconfig.go`), you will need
+to claim your name too :) Once you have it, you can then masquerade as
+other users, by prefixing all your bot commands with `as USER`, e.g.
+`db as foobar save vs INT`.
