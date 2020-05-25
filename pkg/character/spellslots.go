@@ -45,10 +45,12 @@ func NewSpellSlots() SpellSlots {
 func (sl *SpellSlots)String() string {
 	if sl == nil { return "" }
 
+	if len(sl.Memo) == 0 { return "You can't do magic spells :(" }
+	
 	str := fmt.Sprintf("Spell Slots:  (Max:%v)\n", sl.Max)
 	for lvl, slots := range sl.Memo {
 		for idx, slot := range slots {
-			str += fmt.Sprintf(" %d:%d  %s\n", lvl+1, idx+1, slot)
+			str += fmt.Sprintf(" L%d:%d  %s\n", lvl+1, idx+1, slot)
 		}
 	}
 
