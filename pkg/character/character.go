@@ -17,13 +17,15 @@ type Character struct {
 	CurrHitpoints int
 
 	Inventory
+	Spellbook
+	SpellSlots
 }
 
 func NewCharacter() Character {
 	return Character{
-		Inventory: Inventory{
-			Items: []Item{},
-		},
+		Inventory: NewInventory(),
+		Spellbook: NewSpellbook(),
+		SpellSlots: NewSpellSlots(),
 	}
 }
 

@@ -36,8 +36,8 @@ func (b Bot)ProcessLine(vc verbs.VerbContext, in string) string {
 
 
 func sanitizeLine(in string) ([]string) {
-	// Sanitize: remove punctuation, trim space, lowercase.
-	sanitized := strings.ToLower(regexp.MustCompile(`([^-_a-zA-Z0-9 ])`).ReplaceAllString(in, ""))
+	// Sanitize: remove punctuation, trim space, lowercase. Leave in colons for spell indices
+	sanitized := strings.ToLower(regexp.MustCompile(`([^-:_a-zA-Z0-9 ])`).ReplaceAllString(in, ""))
 
 	return strings.Fields(sanitized) // Also trims space
 }

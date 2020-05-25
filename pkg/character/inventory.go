@@ -15,6 +15,12 @@ type Item struct {
 	Description string
 }
 
+func NewInventory() Inventory {
+	return Inventory{
+		Items: []Item{},
+	}
+}
+
 func (a Item)String() string {
 	return a.Description
 }

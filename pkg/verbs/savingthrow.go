@@ -3,13 +3,19 @@ package verbs
 import(
 	"fmt"
 	"math/rand"
-	"strconv"
 )
 
 type SavingThrow struct{}
 
+var modifiers = map[string]int{
+	"veryeasy": -8,
+	"easy": -4,
+	"hard": 4,
+	"veryhard": 8,
+}
+
 func (st SavingThrow)Help() string {
-	return "vs {str,int,wis,con,cha,dex} [modifier, added to roll; -ve means easier]"
+	return "vs {str,int,wis,con,cha,dex} [{veryeasy, easy, hard, veryhard}]"
 }
 
 func (st SavingThrow)Process(vc VerbContext, args []string) string {
@@ -24,7 +30,11 @@ func (st SavingThrow)Process(vc VerbContext, args []string) string {
 	kind,args := args[0], args[1:]
 
 	if len(args) == 1 {
-		modifier,_ = strconv.Atoi(args[0])
+		if m,exists := modifiers[args[0]]; !exists {
+			return fmt.Sprintf("I don't have a '%s' roll modifier ", args[0])
+		} else {
+			modifier = m
+		}
 	}
 
 	if val,_ = vc.Character.Get(kind); val < 0 {

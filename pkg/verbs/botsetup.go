@@ -38,6 +38,9 @@ func (bs *BotSetup)Process(vc VerbContext, args []string) string {
 }
 
 func (bs *BotSetup)Claim(vc VerbContext, name string) string {
+	if vc.ExternalUserId == "" {
+		return "I can't tell who you are - you need to add me to your friend list (and agree to the ToU)"
+	}
 	if _,exists := bs.NameClaims[vc.ExternalUserId]; !exists {
 		bs.NameClaims[vc.ExternalUserId] = name
 		return fmt.Sprintf("%s has been claimed by %s", name, vc.ExternalUserId)
