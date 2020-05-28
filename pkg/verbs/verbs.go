@@ -17,7 +17,8 @@ func init() {
 	HandleVerb("hp",       HitPoints{})
 	HandleVerb("char",     Character{})
 	HandleVerb("inv",      Inventory{})
-	HandleVerb("spells",   Spells{})
+	// HandleVerb("spells",   Spells{})
+	HandleVerb("spells",   SimpleSpells{})
 	HandleVerb("save",     SavingThrow{})
 	HandleVerb("roll",     Roll{})
 	

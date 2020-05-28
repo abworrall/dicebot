@@ -83,12 +83,23 @@ func (sl *SpellSlots)Memorize(sb *Spellbook, i SpellIndex, idx int) error {
 
 	idxStr := SlotIndex(fmt.Sprintf("%d:%d", spell.Level, idx))
 
-	if slot,err := sl.Lookup(idxStr); err != nil {
+	return sl.MemorizeSpell(spell, idxStr)
+}
+
+// }}}
+// {{{ sl.MemorizeSpell
+
+// Memorize looks up spell `i` from the spellbook, and stores it in
+// the slots, as per the level and `idx`. If there is a problem,
+// returns an error.
+func (sl *SpellSlots)MemorizeSpell(spell *Spell, idx SlotIndex) error {
+	if slot,err := sl.Lookup(idx); err != nil {
 		return err
 	} else {
 		slot.Spell = spell
 		slot.Spent = false
 	}
+
 	return nil
 }
 
