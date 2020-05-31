@@ -26,6 +26,7 @@ type Spells struct {}
 func (s Spells)Help() string { return "[learn LVL Some spell] [showbook] [memorize 1:3 2] [cast 1:3] [rememorize]" }
 
 func (s Spells)Process(vc VerbContext, args []string) string {
+	if vc.Character == nil { return "no character loaded :(" }
 	if len(args) < 1 { return vc.Character.SpellSlots.String() }
 
 	switch args[0] {
