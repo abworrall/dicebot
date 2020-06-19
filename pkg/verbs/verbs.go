@@ -17,15 +17,14 @@ func init() {
 	HandleVerb("hp",       HitPoints{})
 	HandleVerb("char",     Character{})
 	HandleVerb("inv",      Inventory{})
-	// HandleVerb("spells",   Spells{})
-	HandleVerb("spells",   SimpleSpells{})
+	// HandleVerb("spells",   Spells{})      // old spellbook-based spells. dump.
+	HandleVerb("spells",   SimpleSpells{})   // "new" simplified spells. also dump.
 	HandleVerb("save",     SavingThrow{})
 	HandleVerb("roll",     Roll{})
 
 	// Rules lookup
-	HandleVerb("rules",    Rules{})
+	HandleVerb("rules",    Rules{})          // use this to build new spellbook stuff !
 
-	
 	// Verbs with explicit state (not part of character objects)
 	HandleVerb("vow",     &Vows{})
 	HandleVerb("insult",  &Insult{})
@@ -52,13 +51,14 @@ var verbs = map[string]Verber{}
 //
 // If you register a pointer object (e.g. `HandleVerb("name",
 // &MyVerb{})`), then the bot framework will consider it stateful, and
-// load/persist it each time the verb runs. And you should make the
+// load/persist that object each time the verb runs. And you should make the
 // interface methods act on pointers (e.g. `func (v *MyVerb)Help()
 // ...`).
 //
 // If you just register a regular object (e.g. `HandleVerb("name2",
-// MyVerb2{})`, then it is considered stateless, and your interface
-// methods should act on objects (e.g. `func (v MyVerb2)Help()`).
+// MyVerb2{})`, then it is considered stateless, and you get a fresh
+// empty one each time the verb runs. And your interface methods
+// should act on objects (e.g. `func (v MyVerb2)Help()`).
 func HandleVerb(v string, vr Verber) {
 	if _,exists := verbs[v]; exists {
 		log.Printf("Verb %s already registered, overwriting", v)
@@ -103,7 +103,7 @@ func Act(vc VerbContext, v string, args []string) string {
 	
 	vr,exists := verbs[v]
 	if !exists {
-		return fmt.Sprintf("I don't `%s`", v)
+		return fmt.Sprintf("`%s` ? Computer says no", v)
 	}
 
 	if IsStateful(vr) {
