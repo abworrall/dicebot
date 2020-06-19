@@ -38,10 +38,11 @@ Duration: %s
 }
 
 func (s Spell)Class() string {
-	if len(s.Classes) == 0 {
-		return "??"
+	names := []string{}
+	for _,c := range s.Classes {
+		names = append (names, c.Name)
 	}
-	return s.Classes[0].Name
+	return strings.Join(names, ",")
 }
 
 type SpellList map[string]Spell
