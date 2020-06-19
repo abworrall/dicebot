@@ -17,7 +17,8 @@ func init() {
 	http.HandleFunc("/debug", debugHandler)
 	registerLineHandlerFor("/line", os.Getenv("GOOGLE_CLOUD_PROJECT"))
 
-	dnd5e.LoadDnd5E("./data") // Dir is relative to appengine module root, which is git repo root
+	dnd5e.InitDnd5E("./data") // Dir is relative to appengine module root, which is git repo root
+	log.Printf("(init has run)\n")
 }
 
 

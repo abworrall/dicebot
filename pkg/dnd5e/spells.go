@@ -20,7 +20,7 @@ type Spell struct{
 }
 
 func (s Spell)String() string {
-	return fmt.Sprintf(`%s
+	return fmt.Sprintf(`--{ %s }--
 Level: %d
 Range: %s
 Duration: %s
@@ -51,6 +51,16 @@ func (sl SpellList)Find(namelike string) []Spell {
 func LoadSpells(filename string) SpellList {
 	sl := map[string]Spell{}
 
+	//pwd,_ := os.Getwd()
+	//log.Printf("pwd: %s", pwd)
+
+	//files,_ := ioutil.ReadDir(".")
+	//names := []string{}
+	//for _,file := range files {
+	//	names = append(names, file.Name())
+	//}
+	//log.Printf("contents: %v", names)
+
 	// Swallow errors
 	if jsonF,err := os.Open(filename); err == nil {
 		defer jsonF.Close()
@@ -62,6 +72,7 @@ func LoadSpells(filename string) SpellList {
 		for _,spell := range spells {
 			sl[spell.Index] = spell
 		}
+		log.Printf("%s, loaded %d objects\n", filename, len(sl))
 	} else {
 		log.Printf("open %s: %v\n", filename, err)
 	}
