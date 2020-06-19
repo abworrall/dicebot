@@ -19,8 +19,8 @@ func (r Roll)Process(vc VerbContext, args []string) string {
 		return "what do you want me to roll ?"
 	}
 
-	bits := regexp.MustCompile(`^(\d*)d(\d+)$`).FindStringSubmatch(args[0]) // 4d6, 4, 6
-	if len(bits) != 3 {
+	bits := regexp.MustCompile(`^(\d*)d(\d+)([-+]\d+)?$`).FindStringSubmatch(args[0]) // 4d6, 4, 6
+	if len(bits) < 3 || len(bits) > 4 {
 		return "that's not how I roll: `"+args[0]+"` is nonsense"
 	}
 
@@ -32,6 +32,11 @@ func (r Roll)Process(vc VerbContext, args []string) string {
 	if ord<=0 { ord = 1 }
 	if ord>100 { return "that's not how I roll: that dice is way too big" }
 
+	modifier := 0
+	if len(bits) == 4 {
+		modifier,_ = strconv.Atoi(bits[3])
+	}
+
 	results := []string{}
 	total := 0
 	for i:=0; i<n; i++ {
@@ -40,12 +45,17 @@ func (r Roll)Process(vc VerbContext, args []string) string {
 		total += r
 	}
 
-	str := fmt.Sprintf("%dd%d: you got ", n, ord)
+	modstr := ""
+	if modifier != 0 {
+		total += modifier
+		modstr = fmt.Sprintf("%+d", modifier)
+	}
 
-	if n == 1 {
-		str += results[0]
-	} else {
-		str += fmt.Sprintf("[%s]  total:%d", strings.Join(results, ","), total)
+	str := fmt.Sprintf("%dd%d%s: you got ", n, ord, modstr)
+	str += fmt.Sprintf("[%s] %s total:%d", strings.Join(results, ","), modstr, total)
+
+	if len(args) > 1 {
+		str += " (for " + strings.Join(args[1:], " ") + ")"
 	}
 
 	vc.LogEvent("rolled " + str)
