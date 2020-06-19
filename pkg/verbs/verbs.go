@@ -21,6 +21,10 @@ func init() {
 	HandleVerb("spells",   SimpleSpells{})
 	HandleVerb("save",     SavingThrow{})
 	HandleVerb("roll",     Roll{})
+
+	// Rules lookup
+	HandleVerb("rules",    Rules{})
+
 	
 	// Verbs with explicit state (not part of character objects)
 	HandleVerb("vow",     &Vows{})

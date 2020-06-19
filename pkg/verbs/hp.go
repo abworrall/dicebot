@@ -27,5 +27,6 @@ func (hp HitPoints)Process(vc VerbContext, args []string) string {
 	} else if vc.Character.CurrHitpoints <= 0 {
 		return fmt.Sprintf("%s is dead :(", vc.User)
 	}
-	return "ok"
+
+	return fmt.Sprintf("ok, now %d/%d", vc.Character.CurrHitpoints, vc.Character.MaxHitpoints)
 }

@@ -40,6 +40,8 @@ db roll 5d6                # roll some dice !
 db save vs str             # test your strength !
 db inv use 2               # assert you will use item #2
 db vow to eat less         # make a vow to do something
+db spell memorise 1:1 cure # memorize a spell
+db spell cast 1:1          # cast a spell !
 db history                 # review a log of important events
 ```
 
@@ -48,8 +50,9 @@ db history                 # review a log of important events
 On LINE, it needs to maintain a mapping between the LINE user IDs and
 the names that identify characters. The easiest way is to get users to
 claim their name once they're logged into LINE: `db bot claim NAME`.
-Note that they can't use the high privacy modes, as they result in all
-user IDs being stripped out before the bot sees anything.
+Note that until the user has agreed to the bot's Terms of Use, the
+user IDs won't be visible to the bot; the user needs to add the bot to
+their friend list and agree to the ToU.
 
 If you are an admin user (see `./config/myconfig.go`), you will need
 to claim your name too :) Once you have it, you can then masquerade as

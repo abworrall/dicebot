@@ -9,12 +9,15 @@ import(
 	"time"
 
 	"github.com/abworrall/dicebot/pkg/bot"
+	"github.com/abworrall/dicebot/pkg/dnd5e"
 	"github.com/abworrall/dicebot/pkg/verbs"
 )
 
 func init() {
 	http.HandleFunc("/debug", debugHandler)
 	registerLineHandlerFor("/line", os.Getenv("GOOGLE_CLOUD_PROJECT"))
+
+	dnd5e.LoadDnd5E("./data") // Dir is relative to appengine module root, which is git repo root
 }
 
 
