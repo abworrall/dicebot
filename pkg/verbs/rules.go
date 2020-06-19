@@ -37,7 +37,7 @@ func (r Rules)Process(vc VerbContext, args []string) string {
 func (r Rules)ShowSpellLike(s string) string {
 	str := "Possible matches :-\n"
 	for _,v := range dnd5e.Dnd.SpellList.Find(s) {
-		str += fmt.Sprintf("[L%d, %s] %s\n", v.Level, v.Index, v.Name)
+		str += fmt.Sprintf("[L%d (%s), %s] %s\n", v.Level, v.Class(), v.Index, v.Name)
 	}
 	return str
 }

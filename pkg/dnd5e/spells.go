@@ -17,21 +17,31 @@ type Spell struct{
 	Range string `json:"range"`
 	Duration string `json:"duration"`
 	Level int `json:"level"`
+	Classes []struct{
+		Name string `json:"name"`
+	} `json:"classes"`
 }
 
 func (s Spell)String() string {
 	return fmt.Sprintf(`--{ %s }--
-Level: %d
+Level: %d (%s)
 Range: %s
 Duration: %s
 %s
 %s`, 
-	s.Name, 
-	s.Level, 
+	s.Name,
+	s.Level, s.Class(),
 	s.Range, 
 	s.Duration, 
 	s.Desc,
 	s.Higher)
+}
+
+func (s Spell)Class() string {
+	if len(s.Classes) == 0 {
+		return "??"
+	}
+	return s.Classes[0].Name
 }
 
 type SpellList map[string]Spell
@@ -51,17 +61,6 @@ func (sl SpellList)Find(namelike string) []Spell {
 func LoadSpells(filename string) SpellList {
 	sl := map[string]Spell{}
 
-	//pwd,_ := os.Getwd()
-	//log.Printf("pwd: %s", pwd)
-
-	//files,_ := ioutil.ReadDir(".")
-	//names := []string{}
-	//for _,file := range files {
-	//	names = append(names, file.Name())
-	//}
-	//log.Printf("contents: %v", names)
-
-	// Swallow errors
 	if jsonF,err := os.Open(filename); err == nil {
 		defer jsonF.Close()
 
