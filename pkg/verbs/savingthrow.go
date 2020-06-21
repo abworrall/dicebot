@@ -2,58 +2,47 @@ package verbs
 
 import(
 	"fmt"
-	"math/rand"
+	"strconv"
+
+	"github.com/abworrall/dicebot/pkg/dnd5e/roll"
 )
 
 type SavingThrow struct{}
 
-var modifiers = map[string]int{
-	"veryeasy": -8,
-	"easy": -4,
-	"hard": 4,
-	"veryhard": 8,
+var attrModifiers = []int{
+	0,-5,-4,-4,  // attr scores 0-3
+	-3,-3,-2,-2,-1,-1, // attr scores 4-9
+	0,0,1,1,2,2, // attr scores 10-15
+	3,3,4,4,5,5, // attr scores 16-21
+	6,6,7,7,8,8,9,9,10, // attr scores 22-30
 }
-
+	
 func (st SavingThrow)Help() string {
-	return "vs {str,int,wis,con,cha,dex} [{veryeasy, easy, hard, veryhard}]"
+	return "vs {str,int,wis,con,cha,dex,per} [DC]"
 }
 
 func (st SavingThrow)Process(vc VerbContext, args []string) string {
 	if vc.Character == nil { return "who are you, again ?" }
-	modifier := 0 // What we add, or remove, from the rolled die
-	val := 0      // The character's attribute value, the 3d6 thing
+	modifier := 0  // What we add, or remove, from the rolled die
+	attrVal := 0   // The character's attribute value, the 3d6 thing
 	
-	if len(args) == 0 || args[0] != "vs" { return st.Help() }
-	args = args[1:] // shift
+	if len(args) <= 1 || args[0] != "vs" { return st.Help() }
+	kind,args := args[1], args[2:] // ignore "vs", shift off the attr name
 
-	if len(args) == 0 { return st.Help() }
-	kind,args := args[0], args[1:]
-
-	if len(args) == 1 {
-		if m,exists := modifiers[args[0]]; !exists {
-			return fmt.Sprintf("I don't have a '%s' roll modifier ", args[0])
-		} else {
-			modifier = m
-		}
-	}
-
-	if val,_ = vc.Character.Get(kind); val < 0 {
+	if attrVal,_ = vc.Character.Get(kind); attrVal < 0 {
 		return fmt.Sprintf("you can't save against '%s'", kind)
+	} else {
+		modifier = attrModifiers[attrVal]
 	}
 
-	x := rand.Intn(20) + 1 // d20
-	madeSave := (x + modifier) <= val
-	outcome := "SAVE!"
-	if !madeSave { outcome = "failed :(" }
+	r := roll.Roll{NumDice:1, DiceSize:20, Modifier:modifier, Reason:"save vs "+kind}
 	
-	modStr := ""
-	if modifier != 0 {
-		modStr = fmt.Sprintf(" with modifier %d", modifier)
+	if len(args) == 1 {
+		r.Target,_ = strconv.Atoi(args[0])
 	}
 
-	vc.LogEvent(fmt.Sprintf("saved vs %s[%2d]%s: got %2d, %s", kind, val, modStr, x, outcome))
-
-	str := fmt.Sprintf("%s, save vs %s[%2d]%s: you rolled %2d, %s", vc.User, kind, val, modStr, x, outcome)
+	str := r.Do().String()
+	vc.LogEvent(str)
 
 	return str
 }
