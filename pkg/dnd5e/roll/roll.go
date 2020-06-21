@@ -185,6 +185,11 @@ func Parse(s string) Roll {
 			ret.WithAdvantage = true
 		} else if word == "withdisadvantage" {
 			ret.WithDisadvantage = true
+		} else if word == ">=" && len(words) > 0 {
+			// This is a bit hacky ... try to handle ">= 17", instead of the expected ">=17"
+			ret.Target,_ = strconv.Atoi(words[0])
+			words = words[1:]
+			
 		} else if bits := regexp.MustCompile(`^>=(\d+)$`).FindStringSubmatch(word); len(bits) == 2 {
 			ret.Target,_ = strconv.Atoi(bits[1])
 		} else {
