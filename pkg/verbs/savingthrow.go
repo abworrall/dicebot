@@ -8,14 +8,6 @@ import(
 )
 
 type SavingThrow struct{}
-
-var attrModifiers = []int{
-	0,-5,-4,-4,  // attr scores 0-3
-	-3,-3,-2,-2,-1,-1, // attr scores 4-9
-	0,0,1,1,2,2, // attr scores 10-15
-	3,3,4,4,5,5, // attr scores 16-21
-	6,6,7,7,8,8,9,9,10, // attr scores 22-30
-}
 	
 func (st SavingThrow)Help() string {
 	return "vs {str,int,wis,con,cha,dex,per} [DC]"
@@ -32,7 +24,7 @@ func (st SavingThrow)Process(vc VerbContext, args []string) string {
 	if attrVal,_ = vc.Character.Get(kind); attrVal < 0 {
 		return fmt.Sprintf("you can't save against '%s'", kind)
 	} else {
-		modifier = attrModifiers[attrVal]
+		modifier = roll.AttrToModifier(attrVal)
 	}
 
 	r := roll.Roll{NumDice:1, DiceSize:20, Modifier:modifier, Reason:"save vs "+kind}
