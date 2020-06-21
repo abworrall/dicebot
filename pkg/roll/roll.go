@@ -141,7 +141,7 @@ func (r Roll)Do() Outcome {
 }
 
 
-// See tests for syntax
+// See roll_test.go for syntax examples
 func Parse(s string) Roll {
 	words := strings.Fields(s)
 	if len(words) == 0 {

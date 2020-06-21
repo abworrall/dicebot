@@ -6,12 +6,12 @@ import(
 	"os"
 
 	"github.com/abworrall/dicebot/pkg/bot"
-	"github.com/abworrall/dicebot/pkg/dnd5e"
+	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
 	"github.com/abworrall/dicebot/pkg/verbs"
 )
 
 func main() {
-	dnd5e.InitDnd5E("./data/")
+	rules.Init("./data/")
 
 	b := bot.New("dicebot", "db")
 	vc := verbs.VerbContext{

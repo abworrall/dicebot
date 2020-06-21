@@ -3,7 +3,7 @@ package verbs
 import(
 	"strings"
 
-	"github.com/abworrall/dicebot/pkg/dnd5e/roll"
+	"github.com/abworrall/dicebot/pkg/roll"
 )
 
 type Roll struct{}

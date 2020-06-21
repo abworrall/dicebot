@@ -3,7 +3,7 @@ package verbs
 import(
 	"fmt"
 	"strings"
-	"github.com/abworrall/dicebot/pkg/dnd5e"
+	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
 )
 
 // Rules is stateless, as the API rule objects are all magically loaded into a global var. For now.
@@ -36,16 +36,16 @@ func (r Rules)Process(vc VerbContext, args []string) string {
 
 func (r Rules)ShowSpellLike(s string) string {
 	str := "Possible matches :-\n"
-	for _,v := range dnd5e.Dnd.SpellList.Find(s) {
+	for _,v := range rules.TheRules.SpellList.Find(s) {
 		str += fmt.Sprintf("[L%d (%s), %s] %s\n", v.Level, v.Class(), v.Index, v.Name)
 	}
 	return str
 }
 
 func (r Rules)ShowSpell(s string) string {
-	if sp,exists := dnd5e.Dnd.SpellList[s]; exists {
+	if sp,exists := rules.TheRules.SpellList[s]; exists {
 		return sp.String()
 	} else {
-		return fmt.Sprintf("oooh %s sounds good, you should invent it!", s)
+		return r.ShowSpellLike(s)
 	}
 }

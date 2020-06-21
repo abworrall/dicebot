@@ -1,7 +1,7 @@
 package encounter
 
 import(
-	"github.com/abworrall/dicebot/pkg/dnd5e/roll"
+	"github.com/abworrall/dicebot/pkg/roll"
 )
 
 // This is all a sketch for now, to help figure out the interfaces

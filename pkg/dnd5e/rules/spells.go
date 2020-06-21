@@ -1,4 +1,4 @@
-package dnd5e
+package rules
 
 import(
 	"encoding/json"
