@@ -17,13 +17,12 @@ func init() {
 	HandleVerb("hp",       HitPoints{})
 	HandleVerb("char",     Character{})
 	HandleVerb("inv",      Inventory{})
-	// HandleVerb("spells",   Spells{})      // old spellbook-based spells. dump.
-	HandleVerb("spells",   SimpleSpells{})   // "new" simplified spells. also dump.
+	HandleVerb("spells",   Spells{})
 	HandleVerb("save",     SavingThrow{})
 	HandleVerb("roll",     Roll{})
 
 	// Rules lookup
-	HandleVerb("rules",    Rules{})          // use this to build new spellbook stuff !
+	HandleVerb("rules",    Rules{})
 
 	// Verbs with explicit state (not part of character objects)
 	HandleVerb("vow",     &Vows{})

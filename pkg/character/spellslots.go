@@ -2,40 +2,45 @@ package character
 
 import(
 	"fmt"
+	"regexp"
+	"strconv"
 
 	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
 )
 
 // SpellSlots represents the spells the player has memorized, and whether they are ready to cast
 type SpellSlots struct {
+	Kind      string   // What kind of spells are allowed
 	Max     []int      // Max number of spells at each level (index 0 == level 1)
-	Memo  [][]Slot     // What's actually memorized in that slot (index 0 == level 1)
+	Memo  [][]Slot    // What's actually memorized in that slot (index 0 == level 1)
 }
 type Slot struct {
-	Spell    *Spell    // Points into the Spell in the Spellbook
+	Name      string
 	Spent     bool     // Whether it is ready to use or has already been used
 }
 
-type SlotIndex string // Should be of the form `2:4`, e.g. the fourth 2nd-level slot
+// How a slot is identified
+type SlotIndex struct {
+	Level int
+	Index int
+}
+func (si SlotIndex)String() string { return fmt.Sprintf("%d.%d", si.Level, si.Index) }
 
 // {{{ s.String
 
 func (s Slot)String() string {
-	if s.Spell == nil {
+	if s.Name == "" {
 		return "[empty]"
 	}
 
-	descrip := "UNRECOGNIZED: "+s.Spell.String()
-
-	if descrips := rules.TheRules.SpellList.Lookup(s.Spell.Name); len(descrips) == 1 {
-		descrip = descrips[0].Summary()
-	}
+	sp := rules.TheRules.SpellList.LookupFirst(s.Name)	
+	str := sp.Summary()
 	
 	if s.Spent {
-		return fmt.Sprintf("(%s)", descrip)
+		str = "(*spent*) " + str
 	}		
 
-	return descrip
+	return str
 }
 
 // }}}
@@ -57,7 +62,7 @@ func (sl *SpellSlots)String() string {
 
 	if len(sl.Memo) == 0 { return "You can't do magic spells :(" }
 	
-	str := fmt.Sprintf("Spell Slots:  (Max:%v)\n", sl.Max)
+	str := fmt.Sprintf("Spell Slots:  (Max:%v, Kind:%s)\n", sl.Max, sl.Kind)
 	for lvl, slots := range sl.Memo {
 		for idx, slot := range slots {
 			str += fmt.Sprintf(" L%d:%d  %s\n", lvl+1, idx+1, slot)
@@ -68,12 +73,13 @@ func (sl *SpellSlots)String() string {
 }
 
 // }}}
-// {{{ sl.SetMax
+// {{{ sl.Init
 
 // SetMax specifies the max slots for each level.
-func (sl *SpellSlots)SetMax(max []int) {
+func (sl *SpellSlots)Init(max []int, kind string) {
 	sl.Max = max
-
+	sl.Kind = kind
+	
 	// Presize all the slot slices to the max size
 	sl.Memo = make([][]Slot, len(max))
 	for i,n := range max {
@@ -84,29 +90,19 @@ func (sl *SpellSlots)SetMax(max []int) {
 // }}}
 // {{{ sl.Memorize
 
-// Memorize looks up spell `i` from the spellbook, and stores it in
-// the slots, as per the level and `idx`. If there is a problem,
-// returns an error.
-func (sl *SpellSlots)Memorize(sb *Spellbook, i SpellIndex, idx int) error {
-	spell,err := sb.Lookup(i)
-	if err != nil { return err }
+func (sl *SpellSlots)Memorize(sb *Spellbook, idxStr string, name string) error {
+	if ! rules.TheRules.IsSpell(name) {
+		return fmt.Errorf("'%s' not a known spell (look up name with `db rules spell blah`)", name)
+	}
 
-	idxStr := SlotIndex(fmt.Sprintf("%d:%d", spell.Level, idx))
-
-	return sl.MemorizeSpell(spell, idxStr)
-}
-
-// }}}
-// {{{ sl.MemorizeSpell
-
-// Memorize looks up spell `i` from the spellbook, and stores it in
-// the slots, as per the level and `idx`. If there is a problem,
-// returns an error.
-func (sl *SpellSlots)MemorizeSpell(spell *Spell, idx SlotIndex) error {
-	if slot,err := sl.Lookup(idx); err != nil {
+	if sb!=nil && !sb.IsKnown(name) {
+		return fmt.Errorf("spell '%s' not in your spellbook", name)
+	}
+	
+	if slot,_,err := sl.Lookup(idxStr); err != nil {
 		return err
 	} else {
-		slot.Spell = spell
+		slot.Name = name
 		slot.Spent = false
 	}
 
@@ -116,16 +112,16 @@ func (sl *SpellSlots)MemorizeSpell(spell *Spell, idx SlotIndex) error {
 // }}}
 // {{{ sl.Cast
 
-func (sl *SpellSlots)Cast(i SlotIndex) (*Spell, error) {
-	slot,err := sl.Lookup(i)
-	if err != nil { return nil, err }
+func (sl *SpellSlots)Cast(idxStr string) (string, error) {
+	slot,_,err := sl.Lookup(idxStr)
+	if err != nil { return "", err }
 
 	if slot.Spent {
-		return nil, fmt.Errorf("That spell slot is spent :(")
+		return "", fmt.Errorf("That spell slot is spent :(")
 	}
 
 	slot.Spent = true
-	return slot.Spell, nil
+	return slot.Name, nil
 }
 
 // }}}
@@ -145,22 +141,42 @@ func (sl *SpellSlots)Refresh() {
 // {{{ sl.Lookup
 
 // Lookup will lookup the slot, or return an error
-func (sl *SpellSlots)Lookup(i SlotIndex) (*Slot, error) {
-	lvl,idx,err := ParseIndex(string(i))
-	if err != nil { return nil, err }
+func (sl *SpellSlots)Lookup(idxStr string) (*Slot, SlotIndex, error) {
+	si,err := parseSlotIndex(idxStr)
+	if err != nil { return nil, SlotIndex{}, err }
 
-	if lvl > len(sl.Memo) {
-		return nil, fmt.Errorf("You don't know things as fancy as level %d", lvl)
+	if si.Level > len(sl.Memo) {
+		return nil, SlotIndex{}, fmt.Errorf("You don't know things as fancy as level %d", si.Level)
 	}
 	
-	// lvl is 1-indexed; since we're going to index into arrays, decrement it
-	lvl = lvl - 1
-
-	if idx > len(sl.Memo[lvl]) {
-		return nil, fmt.Errorf("You only get %d spells at level %d", len(sl.Memo[lvl]), lvl+1)
+	// SlotIndex is 1-indexed; since we're going to index into arrays, decrement it
+	lvl := si.Level - 1
+	idx := si.Index - 1
+	
+	if idx >= len(sl.Memo[lvl]) {
+		return nil, SlotIndex{}, fmt.Errorf("You only get %d spells at level %d", len(sl.Memo[lvl]), si.Level)
 	} else {
-		return &sl.Memo[lvl][idx], nil
+		return &sl.Memo[lvl][idx], si, nil
 	}
+}
+
+// }}}
+
+// {{{ parseSlotIndex
+
+// ParseIndex parse an index style string (e.g. `2:4`) into (level, index), or returns an error.
+// Note that the retrurned level value starts at one, but the returned index value starts at zero (for slice lookup)
+func parseSlotIndex(s string) (SlotIndex, error) {
+	bits := regexp.MustCompile(`^L?(\d*)[.:](\d+)$`).FindStringSubmatch(s) // 2.4, 2, 4
+	if len(bits) != 3 {
+		return SlotIndex{}, fmt.Errorf("index `%s` is nonsense", s)
+	}
+	lvl,_   := strconv.Atoi(bits[1])
+	idx,_ := strconv.Atoi(bits[2])
+
+	if lvl < 1 || lvl > 9  { return SlotIndex{}, fmt.Errorf("you want level %d ? you can't handle level %d", lvl, lvl) }
+	if idx < 1 || idx > 15 { return SlotIndex{}, fmt.Errorf("index %d is mad index", idx) }
+	return SlotIndex{Level:lvl, Index:idx}, nil
 }
 
 // }}}

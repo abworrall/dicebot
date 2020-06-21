@@ -64,13 +64,21 @@ func (i Item)Summary() string {
 		if i.WeaponRange == "Ranged" {
 			s += fmt.Sprintf(" range[%.0f,%.0f]", i.Range.Normal, i.Range.Long)
 		}
-		
+
+		isVersatile := false
 		if len(i.Properties) > 0 {
 			props := make([]string, len(i.Properties))
 			for j,p := range i.Properties {
 				props[j] = p.Name
+				if p.Name == "Versatile" {
+					isVersatile = true
+				}
 			}
 			s += fmt.Sprintf(" [%s]", strings.Join(props, ","))
+		}
+
+		if isVersatile {
+			s += fmt.Sprintf(" 2-handed damage:"+i.Damage2H.String())
 		}
 	}
 	return s

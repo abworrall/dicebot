@@ -3,9 +3,9 @@ package verbs
 import(
 	"fmt"
 	"strconv"
-	"strings"
 	
 	"github.com/abworrall/dicebot/pkg/character"
+	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
 )
 
 // Spells is a stateless verb, since it operates on the character
@@ -13,17 +13,16 @@ import(
 type Spells struct {}
 
 
-// spells learn 1 some rubbish    # level 1, 1st spell
-// spells learn 1 magic missile   # level 2, 2nd spell, etc
-// spells book                    # print out the spellbook
+// Spellbook stuff is optional; if you leave it empty, then you know all spells.
+//   spells book add magic-missile  # add it to spellbook
+//   spells book                    # print out spellbook
 
-// spells memorize 1:2 1          # memorizes the spellbook entry 1:2 into (1st level) slot 1
-// spells memorize 1:2 2          # memorizes the spellbook entry 1:2 into (1st level) slot 2
-// spells cast 1:1                # cast it !
-// spells cast 1:2                # cast the other one !
-// spells refresh                 # re-memorize
 
-func (s Spells)Help() string { return "[learn LVL Some spell] [showbook] [memorize 1:3 2] [cast 1:3] [rememorize]" }
+// spells set 1.2 cure-wounds     # fills up spellslot 1.2 with the cure-wounds spell
+// spells cast 1.1                # cast it !
+// spells resetall                # re-memorize all the spells
+
+func (s Spells)Help() string { return "[set 1.3 cure-wounds] [cast 1.3] [resetall]" }
 
 func (s Spells)Process(vc VerbContext, args []string) string {
 	if vc.Character == nil { return "no character loaded :(" }
@@ -35,43 +34,41 @@ func (s Spells)Process(vc VerbContext, args []string) string {
 		vc.Character.SpellSlots = character.NewSpellSlots()
 		return "(flushed)"
 
-	case "-setmax":
-		if len(args) < 3 { return "-setmax 5 3 1" }
-		max,_ := Atois(args[1:])
-		vc.Character.SetMax(max)
+	case "-init":
+		if len(args) < 4 { return "-init KIND 5 3 1" }
+		max,_ := Atois(args[2:])
+		vc.Character.Init(max, args[1])
 		return "ok"
 		
-	case "showbook":
-		return vc.Character.Spellbook.String()
-
-	case "learn": // args[1]. args[2..]
-		if len(args) < 3 { return s.Help() }
-		if lvl,err := strconv.Atoi(args[1]); err != nil || lvl < 1 || lvl > 9 {
-			return "nonsense"
-		} else {
-			vc.Character.Spellbook.Learn(lvl, strings.Join(args[2:], " "))
-			return "such learnings"
+	case "book":
+		switch len(args) {
+		case 1: return vc.Character.Spellbook.String()
+		case 3: return "book add is TBD"
+		default: return s.Help()
 		}
 
-	case "memorize":
+	case "set":
 		if len(args) != 3 { return s.Help() }
-		spellIdx := character.SpellIndex(args[1])
-		idx,_ := strconv.Atoi(args[2])
-		if err := vc.Character.SpellSlots.Memorize(&vc.Character.Spellbook, spellIdx, idx); err != nil {
+
+		if err := vc.Character.SpellSlots.Memorize(&vc.Character.Spellbook, args[1], args[2]); err != nil {
 			return "you dunce - " + err.Error()
 		}
 		return "ooooh"
 
 	case "cast":
 		if len(args) != 2 { return s.Help() }
-		slotIdx := character.SlotIndex(args[1])
-		if spell,err := vc.Character.SpellSlots.Cast(slotIdx); err != nil {
+		if spell,err := vc.Character.SpellSlots.Cast(args[1]); err != nil {
 			return err.Error()
-		} else if spell == nil {
+		} else if spell == "" {
 			return "*fizzle*"
 		} else {
-			vc.LogEvent("cast " + spell.String())
-			return fmt.Sprintf("%s casts '%s'", vc.User, spell)
+			vc.LogEvent("cast " + spell)
+
+			str := fmt.Sprintf("%s casts '%s'", vc.User, spell)
+			if s := rules.TheRules.SpellList.LookupFirst(spell); s != nil {
+				str += "\n\n" + s.Description()
+			}
+			return str
 		}
 
 	case "rememorize":
