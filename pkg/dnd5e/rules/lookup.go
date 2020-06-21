@@ -12,4 +12,5 @@ type Entryer interface {
 
 type Lookuper interface {
 	Lookup(s string) []Entryer
+	LookupFirst(s string) Entryer
 }

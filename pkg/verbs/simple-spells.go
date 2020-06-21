@@ -3,9 +3,13 @@ package verbs
 import(
 	"fmt"
 	"strings"
-	
+
 	"github.com/abworrall/dicebot/pkg/character"
+	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
 )
+
+// TODO: This is a horror. Throw it all way sometime soon, and have
+// spellbook be a kind of optional allowlist.
 
 // Spells is a stateless verb, since it operates on the character
 // state found in the context
@@ -34,8 +38,12 @@ func (s SimpleSpells)Process(vc VerbContext, args []string) string {
 
 	case "memorize":
 		if len(args) < 3 { return s.Help() }
-		spell := character.Spell{Name: strings.Join(args[2:], " ")}
-		slotIdx := character.SlotIndex(args[1])
+		name := strings.Join(args[2:], " ")
+		if ! rules.TheRules.IsSpell(name) {
+			return fmt.Sprintf("'%s' is not a recognized spell (e.g magic-missile)", name)
+		}
+		spell := character.Spell{Name: name}
+		slotIdx := character.SlotIndex(SanitizeIndex(args[1]))
 
 		if err := vc.Character.SpellSlots.MemorizeSpell(&spell, slotIdx); err != nil {
 			return "you dunce - " + err.Error()
@@ -44,14 +52,22 @@ func (s SimpleSpells)Process(vc VerbContext, args []string) string {
 
 	case "cast":
 		if len(args) != 2 { return s.Help() }
-		slotIdx := character.SlotIndex(args[1])
+		slotIdx := character.SlotIndex(SanitizeIndex(args[1]))
 		if spell,err := vc.Character.SpellSlots.Cast(slotIdx); err != nil {
 			return err.Error()
 		} else if spell == nil {
 			return "*fizzle*"
 		} else {
 			vc.LogEvent("cast " + spell.String())
-			return fmt.Sprintf("%s casts '%s'", vc.User, spell)
+
+
+			str := fmt.Sprintf("%s casts '%s'", vc.User, spell)
+
+			if s := rules.TheRules.SpellList.LookupFirst(spell.Name); s != nil {
+				str += "\n\n" + s.Description()
+			}
+
+			return str
 		}
 
 	case "rememorize":
@@ -64,4 +80,8 @@ func (s SimpleSpells)Process(vc VerbContext, args []string) string {
 	}
 
 	return ""
+}
+
+func SanitizeIndex(in string) string {
+	return strings.TrimLeft(in, "Ll")
 }

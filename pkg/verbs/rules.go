@@ -19,9 +19,15 @@ func (r Rules)Process(vc VerbContext, args []string) string {
 	switch args[0] {
 	case "spell": return r.Lookup(term, rules.TheRules.SpellList)
 	case "equip": return r.Lookup(term, rules.TheRules.EquipmentList)
-		
-	default:
-		return "what...."
+
+/*
+	case "list":
+		switch args[1] {
+		case "weapons": return "TODO: implement list-by-type via Lookuper"
+		}
+*/
+
+	default: return "what...."
 	}
 }
 

@@ -1,11 +1,8 @@
 package rules
 
 import(
-	"encoding/json"
-	"io/ioutil"
 	"fmt"
 	"log"
-	"os"
 )
 
 var(
@@ -29,55 +26,28 @@ func Init(datadir string) {
 	log.Printf("InitRules: datadir=%q, got: %s\n", datadir, TheRules)
 }
 
+// These routines are helpers for things that want to refer to the rules
 
-// loadRules loads up the JSON files it needs to find in `datadir`
-// TODO: error handling
-func load(datadir string) Rules {
-	return Rules{
-		EquipmentList: loadEquipment(datadir + "/" + "5e-equipment.json"),
-		SpellList: loadSpells(datadir + "/" + "5e-spells.json"),
+// IsWeapon verifies that the index-string passed in will lookup a weapon
+func (r Rules)IsWeapon(s string) bool {
+	if item,exists := r.EquipmentList[s]; exists {
+		return item.EquipmentCategory.Name == "Weapon"
 	}
+	return false
 }
 
-// LoadSpells opens a file that should be a ton of JSON objects that parse into spells
-func loadSpells(filename string) SpellList {
-	sl := map[string]Spell{}
-
-	if jsonF,err := os.Open(filename); err == nil {
-		defer jsonF.Close()
-
-		file, _ := ioutil.ReadAll(jsonF)
-		spells := []Spell{}
-		json.Unmarshal(file, &spells)
-
-		for _,spell := range spells {
-			sl[spell.Index] = spell
-		}
-		log.Printf("%s, loaded %d objects\n", filename, len(sl))
-	} else {
-		log.Printf("open %s: %v\n", filename, err)
-	}
-	
-	return sl
+// IsSpell verifies that the index-string passed in will lookup a
+// spell
+func (r Rules)IsSpell(s string) bool {
+	_,exists := r.SpellList[s]
+	return exists
 }
 
-func loadEquipment(filename string) EquipmentList {
-	el := map[string]Item{}
-
-	if jsonF,err := os.Open(filename); err == nil {
-		defer jsonF.Close()
-
-		file, _ := ioutil.ReadAll(jsonF)
-		items := []Item{}
-		json.Unmarshal(file, &items)
-
-		for _,item := range items {
-			el[item.Index] = item
-		}
-		log.Printf("%s, loaded %d objects\n", filename, len(el))
-	} else {
-		log.Printf("open %s: %v\n", filename, err)
+// IsAllowedSpell verifies that the index-string passed in will lookup
+// a spell at the specified level (and type ?)
+func (r Rules)IsAllowedSpell(s string, lvl int) bool {
+	if spell,exists := r.SpellList[s]; exists {
+		return spell.Level == lvl
 	}
-	
-	return el
+	return false
 }

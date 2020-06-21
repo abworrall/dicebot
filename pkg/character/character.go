@@ -3,6 +3,8 @@ package character
 import(
 	"fmt"
 	"strconv"
+
+	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
 )
 
 // A Character holds info about a typical RPG character
@@ -16,6 +18,8 @@ type Character struct {
 	MaxHitpoints int
 	CurrHitpoints int
 
+	CurrWeapon string
+	
 	Inventory
 	Spellbook
 	SpellSlots
@@ -54,6 +58,14 @@ HP: (%d/%d)
 		c.Dex,
 		c.Per,
 		c.CurrHitpoints, c.MaxHitpoints)
+
+	if c.CurrWeapon != "" {
+		w := rules.TheRules.EquipmentList.Lookup(c.CurrWeapon)
+		if len(w) > 0 {
+			s += fmt.Sprintf("\nWeapon: %s\n", w[0].Summary())
+		}
+	}
+
 	return s
 }
 
@@ -69,6 +81,12 @@ func (c *Character)Set(k,v string) string {
 	case "class": c.Class = v
 	case "alignment": c.Alignment = v
 
+	case "weapon":
+		if ! rules.TheRules.IsWeapon(v) {
+			return fmt.Sprintf("'%s' is not a known weapon", v)
+		}
+		c.CurrWeapon = v
+		
 	case "str": c.Str = myatoi(v)
 	case "int": c.Int = myatoi(v)
 	case "wis": c.Wis = myatoi(v)

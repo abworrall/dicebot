@@ -2,6 +2,8 @@ package character
 
 import(
 	"fmt"
+
+	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
 )
 
 // SpellSlots represents the spells the player has memorized, and whether they are ready to cast
@@ -21,11 +23,19 @@ type SlotIndex string // Should be of the form `2:4`, e.g. the fourth 2nd-level 
 func (s Slot)String() string {
 	if s.Spell == nil {
 		return "[empty]"
-	} else if s.Spent {
-		return fmt.Sprintf("(%s)", s.Spell)
-	} else {
-		return fmt.Sprintf(" %s ", s.Spell)
+	}
+
+	descrip := "UNRECOGNIZED: "+s.Spell.String()
+
+	if descrips := rules.TheRules.SpellList.Lookup(s.Spell.Name); len(descrips) == 1 {
+		descrip = descrips[0].Summary()
+	}
+	
+	if s.Spent {
+		return fmt.Sprintf("(%s)", descrip)
 	}		
+
+	return descrip
 }
 
 // }}}

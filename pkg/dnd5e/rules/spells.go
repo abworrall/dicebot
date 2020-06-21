@@ -60,6 +60,13 @@ func (sl SpellList)Lookup(namelike string) []Entryer {
 	return ret
 }
 
+func (sl SpellList)LookupFirst(namelike string) Entryer {
+	if m := sl.Lookup(namelike); len(m) > 0 {
+		return m[0]
+	}
+	return nil
+}
+
 func (s Spell)Class() string {
 	names := []string{}
 	for _,c := range s.Classes {

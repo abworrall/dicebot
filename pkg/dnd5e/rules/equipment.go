@@ -95,3 +95,10 @@ func (el EquipmentList)Lookup(namelike string) []Entryer {
 	}
 	return ret
 }
+
+func (el EquipmentList)LookupFirst(namelike string) Entryer {
+	if m := el.Lookup(namelike); len(m) > 0 {
+		return m[0]
+	}
+	return nil
+}
