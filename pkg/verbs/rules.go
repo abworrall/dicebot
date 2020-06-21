@@ -9,43 +9,32 @@ import(
 // Rules is stateless, as the API rule objects are all magically loaded into a global var. For now.
 type Rules struct{}
 
-func (r Rules)Help() string { return "[spell like burn] [spell burning-hands]" }
+func (r Rules)Help() string { return "[spell burning-hands]" }
 
 func (r Rules)Process(vc VerbContext, args []string) string {
-	if len(args) == 0 { return r.Help() }
+	if len(args) < 2 { return r.Help() }
 
+	term := strings.Join(args[1:], " ")
+	
 	switch args[0] {
-	case "spell":
-		if len(args) < 2 { return r.Help() }
-		if strings.EqualFold(args[1],"like") {
-			if len(args) < 3 { return r.Help() }
-			s := strings.Join(args[2:], " ")
-			return r.ShowSpellLike(s)
-		} else {
-			s := strings.Join(args[1:], " ")
-			return r.ShowSpell(s)
-		}
-
-	case "monster":
-		return "monsters tbd"
+	case "spell": return r.Lookup(term, rules.TheRules.SpellList)
+	case "equip": return r.Lookup(term, rules.TheRules.EquipmentList)
 		
 	default:
 		return "what...."
 	}
 }
 
-func (r Rules)ShowSpellLike(s string) string {
-	str := "Possible matches :-\n"
-	for _,v := range rules.TheRules.SpellList.Find(s) {
-		str += fmt.Sprintf("[L%d (%s), %s] %s\n", v.Level, v.Class(), v.Index, v.Name)
-	}
-	return str
-}
-
-func (r Rules)ShowSpell(s string) string {
-	if sp,exists := rules.TheRules.SpellList[s]; exists {
-		return sp.String()
-	} else {
-		return r.ShowSpellLike(s)
+func (r Rules)Lookup(s string, list rules.Lookuper) string {
+	matches := list.Lookup(s)
+	switch len(matches) {
+	case 0: return fmt.Sprintf("couldn't find anything like '%s'", s)
+	case 1: return matches[0].Description()
+	default:
+		str := "Possible matches :-\n"
+		for _,match := range matches {
+			str += match.Summary() + "\n"
+		}
+		return str
 	}
 }

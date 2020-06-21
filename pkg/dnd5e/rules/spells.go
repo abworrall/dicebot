@@ -1,11 +1,7 @@
 package rules
 
 import(
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 	"strings"
 )
 
@@ -22,7 +18,15 @@ type Spell struct{
 	} `json:"classes"`
 }
 
-func (s Spell)String() string {
+func (s Spell)String() string { return s.Summary() }
+
+func (s Spell)Type() string { return "spell" }
+
+func (s Spell)Summary() string {
+	return fmt.Sprintf("[L%d (%s), %s] %s", s.Level, s.Class(), s.Index, s.Name)
+}
+
+func (s Spell)Description() string {
 	return fmt.Sprintf(`--{ %s }--
 Level: %d (%s)
 Range: %s
@@ -37,45 +41,29 @@ Duration: %s
 	s.Higher)
 }
 
+
+// SpellList just maps the `Index` of each spell to the spell object
+type SpellList map[string]Spell
+
+// Implement the lookup interface
+func (sl SpellList)Lookup(namelike string) []Entryer {
+	if v,exists := sl[namelike]; exists {
+		return []Entryer{v}
+	}
+
+	ret := []Entryer{}
+	for _,v := range sl {
+		if strings.Contains(strings.ToLower(v.Name),strings.ToLower(namelike)) {
+			ret = append(ret, Entryer(v))
+		}
+	}
+	return ret
+}
+
 func (s Spell)Class() string {
 	names := []string{}
 	for _,c := range s.Classes {
 		names = append (names, c.Name)
 	}
 	return strings.Join(names, ",")
-}
-
-type SpellList map[string]Spell
-
-// Find searches the spelllist, returns possible matching spell objects
-func (sl SpellList)Find(namelike string) []Spell {
-	ret := []Spell{}
-	for _,v := range sl {
-		if strings.Contains(strings.ToLower(v.Name),strings.ToLower(namelike)) {
-			ret = append(ret, v)
-		}
-	}
-	return ret
-}
-
-// LoadSpells opens a file that should be a ton of JSON objects that parse into spells
-func LoadSpells(filename string) SpellList {
-	sl := map[string]Spell{}
-
-	if jsonF,err := os.Open(filename); err == nil {
-		defer jsonF.Close()
-
-		file, _ := ioutil.ReadAll(jsonF)
-		spells := []Spell{}
-		json.Unmarshal(file, &spells)
-
-		for _,spell := range spells {
-			sl[spell.Index] = spell
-		}
-		log.Printf("%s, loaded %d objects\n", filename, len(sl))
-	} else {
-		log.Printf("open %s: %v\n", filename, err)
-	}
-	
-	return sl
 }
