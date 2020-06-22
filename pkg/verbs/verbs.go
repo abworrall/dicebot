@@ -21,10 +21,13 @@ func init() {
 	HandleVerb("save",     SavingThrow{})
 	HandleVerb("roll",     Roll{})
 
+	// Encounter data is stored in the context
+	HandleVerb("attack",   Encounter{})
+	
 	// Rules lookup
 	HandleVerb("rules",    Rules{})
 
-	// Verbs with explicit state (not part of character objects)
+	// Verbs with their own state (not part of character objects)
 	HandleVerb("vow",     &Vows{})
 	HandleVerb("insult",  &Insult{})
 }

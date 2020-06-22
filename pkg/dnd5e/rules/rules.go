@@ -14,10 +14,12 @@ var(
 type Rules struct {
 	EquipmentList
 	SpellList
+	MonsterList
 }
 
 func (r Rules)String() string {
-	return fmt.Sprintf("Rules{%d spells, %d items}\n", len(r.SpellList), len(r.EquipmentList))
+	return fmt.Sprintf("Rules{%d spells, %d items, %d monsters}\n",
+		len(r.SpellList), len(r.EquipmentList), len(r.MonsterList))
 }
 
 // InitRules populates the global var with the data it loads from `datadir`

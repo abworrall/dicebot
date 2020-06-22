@@ -17,8 +17,9 @@ func (r Rules)Process(vc VerbContext, args []string) string {
 	term := strings.Join(args[1:], " ")
 	
 	switch args[0] {
-	case "spell": return r.Lookup(term, rules.TheRules.SpellList)
-	case "equip": return r.Lookup(term, rules.TheRules.EquipmentList)
+	case "spell":   return r.Lookup(term, rules.TheRules.SpellList)
+	case "equip":   return r.Lookup(term, rules.TheRules.EquipmentList)
+	case "monster": return r.Lookup(term, rules.TheRules.MonsterList)
 
 /*
 	case "list":

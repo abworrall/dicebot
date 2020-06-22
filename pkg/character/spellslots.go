@@ -65,7 +65,7 @@ func (sl *SpellSlots)String() string {
 	str := fmt.Sprintf("Spell Slots:  (Max:%v, Kind:%s)\n", sl.Max, sl.Kind)
 	for lvl, slots := range sl.Memo {
 		for idx, slot := range slots {
-			str += fmt.Sprintf(" L%d:%d  %s\n", lvl+1, idx+1, slot)
+			str += fmt.Sprintf(" L%d.%d  %s\n", lvl+1, idx+1, slot)
 		}
 	}
 

@@ -5,6 +5,7 @@ import(
 	"strconv"
 
 	"github.com/abworrall/dicebot/pkg/roll"
+	"github.com/abworrall/dicebot/pkg/character"
 )
 
 type SavingThrow struct{}
@@ -24,10 +25,10 @@ func (st SavingThrow)Process(vc VerbContext, args []string) string {
 	if attrVal,_ = vc.Character.Get(kind); attrVal < 0 {
 		return fmt.Sprintf("you can't save against '%s'", kind)
 	} else {
-		modifier = roll.AttrToModifier(attrVal)
+		modifier = character.AttrModifier(attrVal)
 	}
 
-	r := roll.Roll{NumDice:1, DiceSize:20, Modifier:modifier, Reason:"save vs "+kind}
+	r := roll.Roll{NumDice:1, DiceSize:20, Modifier:modifier, Reason:fmt.Sprintf("save vs %s=%d",kind,attrVal)}
 	
 	if len(args) == 1 {
 		r.Target,_ = strconv.Atoi(args[0])

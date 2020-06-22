@@ -66,6 +66,10 @@ HP: (%d/%d)
 		}
 	}
 
+	if len(c.SpellSlots.Memo) > 0 {
+		s += fmt.Sprintf("\n%s", c.SpellSlots.String())
+	}
+	
 	return s
 }
 
@@ -130,4 +134,17 @@ func (c *Character)Get(k string) (int,string) {
 	}
 
 	return i,str
+}
+
+func (c Character)GetAttr(k AttrKind) int {
+	switch k {
+	case Str: return c.Str
+	case Int: return c.Int
+	case Wis: return c.Wis
+	case Con: return c.Con
+	case Cha: return c.Cha
+	case Dex: return c.Dex
+	case Per: return c.Per
+	default:  return -1
+	}
 }

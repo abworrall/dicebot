@@ -1,52 +1,70 @@
 package encounter
 
 import(
+	"fmt"
+	"sort"
+	"github.com/abworrall/dicebot/pkg/character"
 	"github.com/abworrall/dicebot/pkg/roll"
 )
 
-// This is all a sketch for now, to help figure out the interfaces
-
-
-type BaseAttr int
-const(
-	Str BaseAttr = iota
-	Dex
-)
-
-// Weaponer is something that can be used to make an attack, via a roll
-type Weaponer interface {
-	GetHitModifier() int        // What gets added to the base attack roll
-	GetDamageModifier() int     // What gets added to the base damage roll
-	GetBaseDamageRoll() string  // e.g. "4d6+3"
-	GetBaseAttr() BaseAttr      // Melee weaponers have Str, or maybe Dex (finesse, blah)
-}
-
-// Combatter represents an entity that will be fighting. This will be
-// a wrapped monster, or a wrapped character.
-type Combatter interface {
-	GetName() string
-	GetCurrentWeapon() Weaponer
-	GetArmorClass() int
-	GetHP() (int, int)
-	GetAttr(BaseAttr) int // Lookup the base attribute
-
-	TakeDamage(d int)
-}
-
 type Encounter struct {
-	Combatants []Combatter     // each is a wrapped clone of a PC or monster
-	Initiative map[string]int
+	Name string
+	Combatants map[string]Combatter
+	Init Initiative
 	TurnNumber int
+
+	GroupCounts map[string]int   // e.g. GroupCounts["goblin"] = 8 when there are 8 goblins in play
+}
+func (e Encounter)IsNil() bool { return len(e.Combatants) == 0 }
+
+func NewEncounter() Encounter {
+	return Encounter{
+		Combatants: map[string]Combatter{},
+		Init: NewInitiative(),
+		GroupCounts: map[string]int{},
+	}
 }
 
-func (e *Encounter)Add(c Combatter) {}
+func (e Encounter)String() string {
+	if e.IsNil() { return "no data" }
 
-func (e *Encounter)Attack(c1,c2 Combatter) {
-	w := c1.GetCurrentWeapon()
+	str := fmt.Sprintf("--{ %d participants }--\n", len(e.Combatants))
+
+	if len(e.Combatants) == 0 {
+		return str
+	}
+
+	str += e.Init.String()+"\n"
+
+	names := []string{}
+	for _,v := range e.Combatants {
+		names = append(names, v.GetName())
+	}
+	sort.Strings(names)
+	for _,name := range names {
+		str += CombatterToString(e.Combatants[name]) + "\n"
+	}
+
+	return str
+}
+
+// Returns 1 for monster instance of that name, then 2, etc
+func (e *Encounter)NextGroupIndex(name string) int {
+	e.GroupCounts[name]++ // auto-inits
+	return e.GroupCounts[name]
+}
+
+func (e *Encounter)Add(c Combatter) {
+	e.Combatants[c.GetName()] = c
+}
+
+func (e *Encounter)Attack(c1,c2 Combatter, weaponOrAction string) {
+
+	w := c1.GetDamager(weaponOrAction)
 
 	// Build up the modifiers for the attack
 	modifier := w.GetHitModifier() // The weapon might have a +2 or whatever
-	modifier += roll.AttrToModifier(c1.GetAttr(w.GetBaseAttr())) // E.g. if STR weapon, get the STR modifier
+	modifier += character.AttrModifier(c1.GetAttr(w.GetModifierAttr())) // E.g. if STR weapon, get the STR modifier
 
 	// Build the hit roll
 	hit := roll.Roll{
@@ -67,7 +85,7 @@ func (e *Encounter)Attack(c1,c2 Combatter) {
 	damage := roll.Parse(w.GetBaseDamageRoll())
 	// TODO: figure if this is double counting for monsters, who maybe shouldn't get attr based modifiers as well
 	damage.Modifier += w.GetDamageModifier()
-	damage.Modifier += roll.AttrToModifier(c1.GetAttr(w.GetBaseAttr()))
+	damage.Modifier += character.AttrModifier(c1.GetAttr(w.GetModifierAttr()))
 
 	damageOutcome := damage.Do()
 

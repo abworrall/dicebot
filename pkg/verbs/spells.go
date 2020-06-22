@@ -35,17 +35,18 @@ func (s Spells)Process(vc VerbContext, args []string) string {
 		return "(flushed)"
 
 	case "-init":
-		if len(args) < 4 { return "-init KIND 5 3 1" }
+		if len(args) < 3 { return "-init KIND 5 3 1" }
 		max,_ := Atois(args[2:])
 		vc.Character.Init(max, args[1])
 		return "ok"
-		
+/*
 	case "book":
 		switch len(args) {
 		case 1: return vc.Character.Spellbook.String()
 		case 3: return "book add is TBD"
 		default: return s.Help()
 		}
+*/
 
 	case "set":
 		if len(args) != 3 { return s.Help() }
@@ -71,7 +72,7 @@ func (s Spells)Process(vc VerbContext, args []string) string {
 			return str
 		}
 
-	case "rememorize":
+	case "resetall":
 		vc.Character.SpellSlots.Refresh()
 		vc.LogEvent("refreshed their spell slots")
 		return "aah, that's better"

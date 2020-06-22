@@ -60,5 +60,5 @@ func (bs *BotSetup)ClaimDelete(name string) string {
 }
 
 func (bs *BotSetup)Debug(vc VerbContext) string {
-	return fmt.Sprintf("vc: %#v\n\nc: %#v\n\nsetup: %#v", vc, vc.Character, bs)
+	return fmt.Sprintf("vc: %#v\n\nc: %#v\n\nencounter: %#v\n\nsetup: %#v", vc, vc.Character, vc.Encounter, bs)
 }
