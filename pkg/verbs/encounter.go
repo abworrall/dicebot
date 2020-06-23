@@ -33,9 +33,9 @@ type Encounter struct{}
 //   attack TARGET1,TARGET2,... do 4d6+4
 
 // How players get attacked:
-//   attack TARGET by MONSTER with ACTION
+//   attack TARGET by MONSTER [with ACTION]
 
-func (e Encounter)Help() string { return "[attack join] [attack TARGET [with WEAPON][do DAMAGEROLL][by MONSTER]]" }
+func (e Encounter)Help() string { return "[attack join], [attack TARGET [with WEAPON][do DAMAGEROLL]}" }
 
 func (e Encounter)Process(vc VerbContext, args []string) string {
 	if len(args) < 1 { return vc.Encounter.String() }
