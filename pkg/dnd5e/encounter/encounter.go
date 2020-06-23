@@ -3,7 +3,7 @@ package encounter
 import(
 	"fmt"
 	"sort"
-	"github.com/abworrall/dicebot/pkg/character"
+
 	"github.com/abworrall/dicebot/pkg/roll"
 )
 
@@ -58,36 +58,44 @@ func (e *Encounter)Add(c Combatter) {
 	e.Combatants[c.GetName()] = c
 }
 
-func (e *Encounter)Attack(c1,c2 Combatter, weaponOrAction string) {
+func (e *Encounter)Lookup(name string) (Combatter, bool) {
+	c,exists := e.Combatants[name]
+	return c,exists
+}
 
-	w := c1.GetDamager(weaponOrAction)
+func (e *Encounter)Attack(c1,c2 Combatter, weaponOrAction string) string {
+	str := fmt.Sprintf("%s attacks %s with %s: ", c1.GetName(), c2.GetName(), weaponOrAction)
 
-	// Build up the modifiers for the attack
-	modifier := w.GetHitModifier() // The weapon might have a +2 or whatever
-	modifier += character.AttrModifier(c1.GetAttr(w.GetModifierAttr())) // E.g. if STR weapon, get the STR modifier
+	weapon := c1.GetDamager(weaponOrAction)
+	if weapon == nil || weapon.GetName() == "" {
+		return fmt.Sprintf("%s did not have a '%s'", c1.GetName(), weaponOrAction)
+	}
 
 	// Build the hit roll
-	hit := roll.Roll{
+	hitRoll := roll.Roll{
 		NumDice: 1,
 		DiceSize: 20,
-		Modifier: modifier,
+		Modifier: weapon.GetHitModifier(),
 		Target: c2.GetArmorClass(),
-		// TODO: figure out how to wedge advantage/disadvantage into this
+		// TODO: figure out how to wedge advantage/disadvantage into this; maybe bring AttackSpec to this layer ?
 	}
 
-	hitOutcome := hit.Do()
-	if !hitOutcome.Success {
-		// Attack failed
-		return
+	hitOutcome := hitRoll.Do()
+	str += "Attack - " + hitOutcome.String()
+
+	if hitOutcome.Success {
+		// We hit ! Damage roll !
+		damageRoll := roll.Parse(weapon.GetDamageRoll())
+		damageOutcome := damageRoll.Do()
+		str += " Damage - " + damageOutcome.String()
+
+		c2.TakeDamage(damageOutcome.Total)
+
+		hp,_ := c2.GetHP()
+		if hp == 0 {
+			str += " they are DEAD"
+		}
 	}
 
-	// Damage roll !
-	damage := roll.Parse(w.GetBaseDamageRoll())
-	// TODO: figure if this is double counting for monsters, who maybe shouldn't get attr based modifiers as well
-	damage.Modifier += w.GetDamageModifier()
-	damage.Modifier += character.AttrModifier(c1.GetAttr(w.GetModifierAttr()))
-
-	damageOutcome := damage.Do()
-
-	c2.TakeDamage(damageOutcome.Total)
+	return str
 }

@@ -18,7 +18,10 @@ type Character struct {
 	MaxHitpoints int
 	CurrHitpoints int
 
+	Weapons map[string]int
 	CurrWeapon string
+	Armor string
+	Shield bool
 	
 	Inventory
 	Spellbook
@@ -30,6 +33,7 @@ func NewCharacter() Character {
 		Inventory: NewInventory(),
 		Spellbook: NewSpellbook(),
 		SpellSlots: NewSpellSlots(),
+		Weapons: map[string]int{},
 	}
 }
 
@@ -39,30 +43,43 @@ Race: %s
 Class: %s (%d)
 Alignment: %s
 
-STR: %2d
-INT: %2d
-WIS: %2d
-CON: %2d
-CHA: %2d
-DEX: %2d
-PER: %2d
+STR: %2d (%+d)
+INT: %2d (%+d)
+WIS: %2d (%+d)
+CON: %2d (%+d)
+CHA: %2d (%+d)
+DEX: %2d (%+d)
+PER: %2d (%+d)
 
 HP: (%d/%d)
 `,
 		c.Name, c.Race, c.Class, c.Level, c.Alignment,
-		c.Str,
-		c.Int,
-		c.Wis,
-		c.Con,
-		c.Cha,
-		c.Dex,
-		c.Per,
+		c.Str, AttrModifier(c.Str),
+		c.Int, AttrModifier(c.Int),
+		c.Wis, AttrModifier(c.Wis),
+		c.Con, AttrModifier(c.Con),
+		c.Cha, AttrModifier(c.Cha),
+		c.Dex, AttrModifier(c.Dex),
+		c.Per, AttrModifier(c.Per),
 		c.CurrHitpoints, c.MaxHitpoints)
 
-	if c.CurrWeapon != "" {
-		w := rules.TheRules.EquipmentList.Lookup(c.CurrWeapon)
-		if len(w) > 0 {
-			s += fmt.Sprintf("\nWeapon: %s\n", w[0].Summary())
+	if c.Armor != "" {
+		armor := rules.TheRules.EquipmentList.LookupFirst(c.Armor)
+		s += fmt.Sprintf("\nArmor: %s", armor.Summary())
+		if c.Shield {
+			s += ", and a shield too"
+		}
+		s += "\n"
+	}
+
+	if len(c.Weapons) > 0 {
+		s += "\n--{ Weapons }--\n"
+		for name,_ := range c.Weapons {
+			w := rules.TheRules.EquipmentList.LookupFirst(name)
+
+			prefix := "   "
+			if c.CurrWeapon == name { prefix = "** " }
+			s += fmt.Sprintf("%s%s\n", prefix, w.Summary())
 		}
 	}
 
@@ -89,7 +106,16 @@ func (c *Character)Set(k,v string) string {
 		if ! rules.TheRules.IsWeapon(v) {
 			return fmt.Sprintf("'%s' is not a known weapon", v)
 		}
+		c.Weapons[v] = 1
 		c.CurrWeapon = v
+
+	case "shield": c.Shield = (myatoi(v) == 1)
+		
+	case "armor":
+		if ! rules.TheRules.IsArmor(v) {
+			return fmt.Sprintf("'%s' is not a known kind of armor", v)
+		}
+		c.Armor = v
 		
 	case "str": c.Str = myatoi(v)
 	case "int": c.Int = myatoi(v)
@@ -134,17 +160,4 @@ func (c *Character)Get(k string) (int,string) {
 	}
 
 	return i,str
-}
-
-func (c Character)GetAttr(k AttrKind) int {
-	switch k {
-	case Str: return c.Str
-	case Int: return c.Int
-	case Wis: return c.Wis
-	case Con: return c.Con
-	case Cha: return c.Cha
-	case Dex: return c.Dex
-	case Per: return c.Per
-	default:  return -1
-	}
 }

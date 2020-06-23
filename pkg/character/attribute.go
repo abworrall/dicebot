@@ -26,3 +26,20 @@ func AttrModifier(attrVal int) int {
 	}
 	return attrModifiers[attrVal]
 }
+
+func (c Character)GetAttr(k AttrKind) int {
+	switch k {
+	case Str: return c.Str
+	case Int: return c.Int
+	case Wis: return c.Wis
+	case Con: return c.Con
+	case Cha: return c.Cha
+	case Dex: return c.Dex
+	case Per: return c.Per
+	default:  return -1
+	}
+}
+
+func (c Character)GetModifier(k AttrKind) int {
+	return AttrModifier(c.GetAttr(k))
+}

@@ -38,6 +38,14 @@ func (r Rules)IsWeapon(s string) bool {
 	return false
 }
 
+// IsArmor verifies that the index-string passed in will lookup a kind of armor
+func (r Rules)IsArmor(s string) bool {
+	if item,exists := r.EquipmentList[s]; exists {
+		return item.EquipmentCategory.Name == "Armor"
+	}
+	return false
+}
+
 // IsSpell verifies that the index-string passed in will lookup a
 // spell
 func (r Rules)IsSpell(s string) bool {

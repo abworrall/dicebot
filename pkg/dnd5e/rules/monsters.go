@@ -33,12 +33,15 @@ type Monster struct {
 		Desc string `json:"desc"`
 	} `json:"special_abilities"`
 
-	Actions []struct{
-		Name string `json:"name"`
-		Desc string `json:"desc"`
-		AttackBonus int `json:"attack_bonus"`
-		Damage []DamageStruct `json:"damage"`
-	}
+	Actions []ActionStruct `json:"actions"`
+}
+
+type ActionStruct struct{
+	Index string
+	Name string `json:"name"`
+	Desc string `json:"desc"`
+	AttackBonus int `json:"attack_bonus"`
+	Damage []DamageStruct `json:"damage"`
 }
 
 func (m Monster)String() string { return m.Summary() }
@@ -67,6 +70,15 @@ func (m Monster)Description() string {
 	}
 
 	return s
+}
+
+func (m *Monster)PostLoadFixups() {
+	// The actions don't have an index field, but we need to refer to them from outside, so ...
+	for i,_ := range m.Actions {
+		idx := strings.ToLower(m.Actions[i].Name)
+		idx = strings.ReplaceAll(idx, " ", "-")
+		m.Actions[i].Index = idx
+	}
 }
 
 

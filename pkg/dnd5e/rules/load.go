@@ -71,6 +71,7 @@ func loadMonsters(filename string) MonsterList {
 		json.Unmarshal(file, &monsters)
 
 		for _,monster := range monsters {
+			monster.PostLoadFixups()
 			ml[monster.Index] = monster
 		}
 		log.Printf("%s, loaded %d objects\n", filename, len(ml))

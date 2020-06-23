@@ -44,7 +44,8 @@ func (r Roll)RollInitiative(vc VerbContext) string {
 
 	dex := vc.Character.GetAttr(character.Dex)
 	mod := character.AttrModifier(dex)
-	initRoll := roll.Roll{NumDice:1, DiceSize:20, Modifier:mod, Reason:fmt.Sprintf("initiative, dex=%d", dex)}
+	reason := fmt.Sprintf("initiative for %s, dex=%d", name, dex)
+	initRoll := roll.Roll{NumDice:1, DiceSize:20, Modifier:mod, Reason:reason}
 	o := initRoll.Do()
 
 	vc.Encounter.Init.Set(name, o.Total)
