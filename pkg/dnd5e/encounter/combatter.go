@@ -29,13 +29,14 @@ type Damager interface {
 
 func CombatterToString(c Combatter) string {
 	hp,maxhp := c.GetHP()
-	flag := ""
-	if hp <= 0 { flag = "*DEAD* " }
-	str := fmt.Sprintf("[%s] %sHP:%d/%d, AC:%d [Str:%d, Int:%d, Dex:%d]",
-		c.GetName(), flag, hp, maxhp, c.GetArmorClass(),
-		c.GetAttr(character.Str),
-		c.GetAttr(character.Int),
-		c.GetAttr(character.Dex))
+
+	str := fmt.Sprintf("[%s] ", c.GetName())
+
+	if hp <= 0 {
+		return str + "is *DEAD*"
+	}
+
+	str += fmt.Sprintf("HP:%d/%d, AC:%d", hp, maxhp, c.GetArmorClass())
 
 	for _,name := range c.GetDamagerNames() {
 		d := c.GetDamager(name)

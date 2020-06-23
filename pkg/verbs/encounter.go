@@ -30,6 +30,7 @@ type Encounter struct{}
 //   attack TARGET
 //   attack TARGET with WEAPON
 //   attack TARGET do 4d6+4
+//   attack TARGET1,TARGET2,... do 4d6+4
 
 // How players get attacked:
 //   attack TARGET by MONSTER with ACTION
@@ -214,10 +215,10 @@ func (e Encounter)AttackTarget(vc VerbContext, spec AttackSpec) string {
 		return str
 	}
 
-	str := ""
-	for _,target := range spec.Targets {
-		str += vc.Encounter.Attack(spec.Attacker, target, spec.Weapon) + "\n"
+	if len(spec.Targets) != 1 {
+		return "You can only attack one target with your weapon"
 	}
+	str := vc.Encounter.Attack(spec.Attacker, spec.Targets[0], spec.Weapon) + "\n"
 
 	return str
 }
