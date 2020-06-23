@@ -11,7 +11,7 @@ type Insult struct{
 	New bool
 }
 
-func (i *Insult)Help() string { return "[user] [learn user is a limpet]" }
+func (i *Insult)Help() string { return "[USER], [learn USER is a limpet]" }
 
 func (i *Insult)Process(vc VerbContext, args []string) string {
 	if len(args) == 0 { return i.Help() }

@@ -22,7 +22,7 @@ type Spells struct {}
 // spells cast 1.1                # cast it !
 // spells resetall                # re-memorize all the spells
 
-func (s Spells)Help() string { return "[set 1.3 cure-wounds] [cast 1.3] [resetall]" }
+func (s Spells)Help() string { return "[set 1.3 CURE-WOUNDS], [cast 1.3], [resetall]" }
 
 func (s Spells)Process(vc VerbContext, args []string) string {
 	if vc.Character == nil { return "no character loaded :(" }

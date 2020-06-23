@@ -2,12 +2,12 @@ package verbs
 
 import "fmt"
 
-// Character is stateless, in that the verb doesnb't have its own state; it simply operates
+// Character is stateless, in that the verb doesn't have its own state; it simply operates
 // on the character's state in the context
 type Character struct{}
 
 func (c Character)Help() string {
-	return "[set field value] - fields are race,class,alignment,level,maxhp,hp,str,..."
+	return "[set FIELD VALUE], [list]"
 }
 
 func (c Character)Process(vc VerbContext, args []string) string {
@@ -23,6 +23,10 @@ func (c Character)Process(vc VerbContext, args []string) string {
 	case "set":
 		if len(args) != 3 { return "`set field value`, plz" }
 		return vc.Character.Set(args[1], args[2])
+
+	case "list":
+		return "[Useful fields: weapon, armor, shield]\n"+
+			"[Less useful fields: race, class, alignment, level, mazhp, hp, str, int, wis, con, cha, dex per]"
 
 	case "setstats":
 		if len(args) != 8 { return "`setstats 1 2 3 4 5 6 7`, plz" }

@@ -11,7 +11,7 @@ type BotSetup struct {
 }
 
 func (bs *BotSetup)Help() string {
-	return "claim NAME"
+	return "claim USER"
 }
 
 func (bs *BotSetup)MaybeInit() {

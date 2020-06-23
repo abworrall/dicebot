@@ -68,8 +68,13 @@ func (o Outcome)String() string {
 	if o.Ignored > 0 {
 		vals = append(vals, fmt.Sprintf("%d", o.Ignored))
 	}
-	
-	s := fmt.Sprintf("Roll %s: [%s]", o.Roll, strings.Join(vals,","))
+
+	diceStr := "[" + strings.Join(vals,",") + "]"
+	if o.Roll.NumDice == 1 && (o.Roll.WithAdvantage || o.Roll.WithDisadvantage) {
+		diceStr = "{" + strings.Join(vals,",") + "}"
+	}
+
+	s := fmt.Sprintf("Roll %s: %s", o.Roll, diceStr)
 	if o.Roll.Modifier != 0 {
 		s += fmt.Sprintf("%+d", o.Roll.Modifier)
 	}
