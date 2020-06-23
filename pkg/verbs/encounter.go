@@ -13,20 +13,19 @@ import(
 // by the verb context.
 type Encounter struct{}
 
-
 // Character prep steps:
-//   char set weapon longsword  // these populate the list of named attacks you can make
+//   char set weapon longsword   // populate the list of named attacks you can make by adding weapons
 //   char set weapon shortsword
-//   char set weapon longsword  // re-establishes the default
+//   char set weapon longsword   // re-establishes the default
 //   char set armor scale-mail
-//   char set shield 1          // or 0, to disable
+//   char set shield 1           // or 0, to disable
 
 // Setup steps:
 //   attack -reset
-//   attack add goblin.4 wolf.2 bugbear
-//   as lanja attack join
+//   attack add goblin.4 wolf.2 bugbear  // add some friends tot he encounter
 
-// How players make attacks:
+// How players get involved:
+//   attack join
 //   attack TARGET
 //   attack TARGET with WEAPON
 //   attack TARGET do 4d6+4
@@ -49,10 +48,9 @@ func (e Encounter)Process(vc VerbContext, args []string) string {
 
 	case "add":       return e.AddMonsters(vc, args[1:])
 	case "join":      return e.AddPlayer(vc)
-	case "damage":    return e.DoDamage(vc, args[1:])
 	}
 
-	// Second, assume it's an attack spec
+	// Else, assume it's an attack spec
 	attackSpec, err := ParseAttackArgs(vc, args)
 	if err != nil {
 		return fmt.Sprintf("Problems: %v", err)
@@ -79,8 +77,7 @@ func (e Encounter)AddMonsters(vc VerbContext, args []string) string {
 	return str
 }
 
-// goblin
-// goblin.3
+// `nameStr` has an optional count, e.g. `goblin.3`
 func (e Encounter)AddMonster(vc VerbContext, nameStr string) string {
 	name := nameStr
 	bits := strings.Split(nameStr, ".")
@@ -98,53 +95,18 @@ func (e Encounter)AddMonster(vc VerbContext, nameStr string) string {
 	str := fmt.Sprintf("added %s x%d", name, n)
 	
 	for i:=0; i<n; i++ {
+		// If there are already some monsters of the same type, make sure
+		// we starte numbering where they left off.
 		idx := vc.Encounter.NextGroupIndex(name)
 		c := encounter.NewCombatterFromMonster(m, idx)
 		vc.Encounter.Add(c)
 
 		if idx == 1 {
-			// Roll initiative !
+			// We are the first of our kind - roll initiative !
 			initVal,initStr := encounter.CombatterRollInitiative(c)
 			vc.Encounter.Init.Set(name,initVal)
 			str += " " + initStr
 		}
-	}
-
-	return str
-}
-
-func (e Encounter)DoDamage(vc VerbContext, args []string) string {
-	str := ""
-
-	if len(args) != 2 { return "damage TARGET {NN or NdM+X}" }
-
-	c,exists := vc.Encounter.Lookup(args[0])
-	if !exists {
-		return fmt.Sprintf("combatant '%s' not found", args[0])
-	}
-
-	damage, err := strconv.Atoi(args[1])
-
-	if err != nil {
-		// Probably a dice then
-		r := roll.Parse(args[1])
-		r.Reason = "damage"
-		if r.Err != nil {
-			return fmt.Sprintf("I don't get '%s'", args[1])
-		}
-
-		o := r.Do()
-
-		str += fmt.Sprintf("%s\n", o)
-		damage = o.Total
-	}
-
-	c.TakeDamage(damage)
-	str += fmt.Sprintf("%s gets %d damage", args[0], damage)
-
-	hp,_ := c.GetHP()
-	if hp == 0 {
-		str += " and DIES"
 	}
 
 	return str
