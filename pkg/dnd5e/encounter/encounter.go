@@ -26,7 +26,7 @@ func NewEncounter() Encounter {
 }
 
 func (e Encounter)String() string {
-	if e.IsNil() { return "no data" }
+	if e.IsNil() { return "nah, everyone is chillin'" }
 
 	str := fmt.Sprintf("--{ %d participants }--\n", len(e.Combatants))
 

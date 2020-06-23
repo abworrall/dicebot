@@ -16,13 +16,13 @@ type Encounter struct{}
 // Character prep steps:
 //   char set weapon longsword   // populate the list of named attacks you can make by adding weapons
 //   char set weapon shortsword
-//   char set weapon longsword   // re-establishes the default
+//   char set weapon longsword   // default is the last one added (OK to add more than once)
 //   char set armor scale-mail
 //   char set shield 1           // or 0, to disable
 
 // Setup steps:
 //   attack -reset
-//   attack add goblin.4 wolf.2 bugbear  // add some friends tot he encounter
+//   attack add goblin.4 wolf.2 bugbear  // add some friends to the encounter
 
 // How players get involved:
 //   attack join

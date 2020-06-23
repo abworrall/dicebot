@@ -9,7 +9,7 @@ import(
 // Rules is stateless, as the API rule objects are all magically loaded into a global var. For now.
 type Rules struct{}
 
-func (r Rules)Help() string { return "[spell BURNING-HANDS] [equip SWORD] [monster GOBLIN" }
+func (r Rules)Help() string { return "[spell BURNING-HANDS] [equip SWORD] [monster GOBLIN]" }
 
 func (r Rules)Process(vc VerbContext, args []string) string {
 	if len(args) < 2 { return r.Help() }

@@ -32,6 +32,7 @@ type Item struct {
 	} `json:"armor_class"`
 
 	Weight int `json:"weight"`
+	Desc []string `json:"desc"`
 	
 	Properties []struct{
 		Name string `json:"name"`
@@ -59,7 +60,7 @@ func (d DamageStruct)String() string {
 	return s
 }
 
-func (i Item)String() string { return i.Summary() }
+func (i Item)String() string { return i.Summary()}
 
 func (i Item)Type() string { return "equipment" }
 
@@ -99,7 +100,7 @@ func (i Item)Summary() string {
 	return s
 }
 
-func (i Item)Description() string { return i.Summary() + "\n" }
+func (i Item)Description() string { return i.Summary() + "\n" + i.GetDescriptions() }
 
 func (i Item)HasProperty(name string) bool {
 	for _,prop := range i.Properties {
@@ -110,6 +111,13 @@ func (i Item)HasProperty(name string) bool {
 	return false
 }
 
+func (i Item)GetDescriptions() string {
+	str := ""
+	for _,d := range i.Desc {
+		str += "[" + d + "]\n"
+	}
+	return str
+}
 
 // EquipmentList simply maps the `Index` of each item to the full object
 type EquipmentList map[string]Item
