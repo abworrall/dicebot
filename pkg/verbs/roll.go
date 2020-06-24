@@ -12,7 +12,7 @@ import(
 type Roll struct{}
 
 func (r Roll)Help() string {
-	return "[4d6+3 >=8 withadvantage], [init], [vs ATTR [DC] [withadvantage]]"
+	return "[4d6+3 >=8 withadvantage], [init], [vs ATTR [DC] [withadvantage] [for BLAH]]"
 }
 
 func (r Roll)Process(vc VerbContext, args []string) string {
@@ -54,7 +54,7 @@ func (r Roll)RollInitiative(vc VerbContext) string {
 	return o.String()
 }
 
-// roll check str MM [withadvantage,withdisadvantage]
+// roll check STR DC [withadvantage,withdisadvantage] [for BLAH BLAH]
 func (r Roll)RollAbilityCheck(vc VerbContext, args []string) string {
 	if vc.Character == nil || len(args) == 0 {
 		return "we're not set up for that"
@@ -67,15 +67,22 @@ func (r Roll)RollAbilityCheck(vc VerbContext, args []string) string {
 		NumDice: 1,
 		DiceSize: 20,
 		Modifier: attrMod,
-		Reason: fmt.Sprintf("%s ability check %s=%d", vc.Character.Name, attrKind, attrVal),
 	}
 
 	args = args[1:]
 	
+	inputReason := ""
+
+breakLabel:
 	for len(args) > 0 {
 		switch args[0] {
 		case "withadvantage": checkRoll.WithAdvantage = true
 		case "withdisadvantage": checkRoll.WithDisadvantage = true
+
+		case "for":
+			inputReason = "{" + strings.Join(args[1:], " ") + "}"
+			break breakLabel // we're done parsing, so bail
+
 		default:
 			if n,err := strconv.Atoi(args[0]); err == nil {
 				checkRoll.Target = n
@@ -86,6 +93,13 @@ func (r Roll)RollAbilityCheck(vc VerbContext, args []string) string {
 		args = args[1:]
 	}
 
+	reason := fmt.Sprintf("%s, ability check, %s=%d", vc.Character.Name, attrKind, attrVal)
+	if inputReason != "" {
+		reason += ", for " + inputReason
+	}
+
+	checkRoll.Reason = reason
+		
 	o := checkRoll.Do()
 
 	return o.String()
