@@ -17,6 +17,7 @@ type Spell struct{
 		Name string `json:"name"`
 	} `json:"classes"`
 }
+func (s Spell)IsNil() bool { return s.Index == "" }
 
 func (s Spell)String() string { return s.Summary() }
 

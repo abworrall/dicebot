@@ -12,7 +12,7 @@ import(
 type Roll struct{}
 
 func (r Roll)Help() string {
-	return "[4d6+3 >=8 withadvantage], [init], [check ATTR [DC] [withadvantage]]"
+	return "[4d6+3 >=8 withadvantage], [init], [vs ATTR [DC] [withadvantage]]"
 }
 
 func (r Roll)Process(vc VerbContext, args []string) string {
@@ -23,7 +23,7 @@ func (r Roll)Process(vc VerbContext, args []string) string {
 	// Some named rolls
 	switch args[0] {
 	case "init": return r.RollInitiative(vc)
-	case "check": return r.RollAbilityCheck(vc, args[1:])
+	case "vs":   return r.RollAbilityCheck(vc, args[1:])
 	}
 	
 	str := roll.New(strings.Join(args, " ")).String()

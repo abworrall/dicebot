@@ -5,6 +5,7 @@ import(
 	"strconv"
 
 	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+	"github.com/abworrall/dicebot/pkg/dnd5e/spells"
 )
 
 // A Character holds info about a typical RPG character
@@ -24,8 +25,17 @@ type Character struct {
 	Shield bool
 	
 	Inventory
+
+	//// OLD, kill off when safe
+	//
 	Spellbook
 	SpellSlots
+	//
+	////
+
+	// The new shiny
+	SpellsMemorized spells.Set
+	Slots spells.Slots
 }
 
 func NewCharacter() Character {
@@ -34,6 +44,8 @@ func NewCharacter() Character {
 		Spellbook: NewSpellbook(),
 		SpellSlots: NewSpellSlots(),
 		Weapons: map[string]int{},
+
+		SpellsMemorized: spells.NewSet(),
 	}
 }
 
@@ -83,12 +95,20 @@ HP: (%d/%d)
 		}
 	}
 
-	if len(c.SpellSlots.Memo) > 0 {
-		s += fmt.Sprintf("\n%s", c.SpellSlots.String())
+	if c.Slots.Max[1] > 0 {
+		s += fmt.Sprintf("\n%s\n-- %s", c.SpellsMemorized, c.Slots)
 	}
 	
 	return s
 }
+
+func (c *Character)MagicString() string {
+	if c.Slots.Max[1] == 0 {
+		return "You can't do magic :("
+	}
+	return fmt.Sprintf("\n%s\n-- %s", c.SpellsMemorized, c.Slots)
+}
+
 
 func (c *Character)Set(k,v string) string {
 	myatoi := func(s string) int {

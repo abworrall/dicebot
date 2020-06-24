@@ -9,6 +9,7 @@ import(
 	"github.com/abworrall/dicebot/pkg/character"
 	"github.com/abworrall/dicebot/pkg/config"
 	"github.com/abworrall/dicebot/pkg/dnd5e/encounter"
+	"github.com/abworrall/dicebot/pkg/state"
 )
 
 // VerbContext is passed by value to all the various verbs. If any
@@ -17,7 +18,7 @@ import(
 
 type VerbContext struct {
 	Ctx           context.Context
-	StateManager
+	state.StateManager
 
 	// State we prepopulate, to be helpful
 	Character      *character.Character
