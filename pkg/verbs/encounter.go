@@ -29,12 +29,13 @@ type Encounter struct{}
 //   attack TARGET
 //   attack TARGET with WEAPON
 //   attack TARGET do 4d6+4
+//   attack TARGET hp -17
 //   attack TARGET1,TARGET2,... do 4d6+4
 
 // How players get attacked:
 //   attack TARGET by MONSTER [with ACTION]
 
-func (e Encounter)Help() string { return "[join], [TARGET [with WEAPON][do DAMAGEROLL]" }
+func (e Encounter)Help() string { return "[join], [TARGET [with WEAPON][do DAMAGEROLL][hp +-NN]" }
 
 func (e Encounter)Process(vc VerbContext, args []string) string {
 	if len(args) < 1 { return vc.Encounter.String() }
@@ -65,7 +66,11 @@ func (e Encounter)AddPlayer(vc VerbContext) string {
 
 	c := encounter.NewCombatterFromCharacter(*vc.Character)
 	vc.Encounter.Add(c)
-	return fmt.Sprintf("%s has joined the fray (now `db roll init`)", vc.Character.Name)
+
+	initVal,initStr := encounter.CombatterRollInitiative(c)
+	vc.Encounter.Init.Set(vc.Character.Name,initVal)
+
+	return fmt.Sprintf("%s has joined the fray (init: %s)", vc.Character.Name, initStr)
 }
 
 func (e Encounter)AddMonsters(vc VerbContext, args []string) string {
@@ -117,9 +122,10 @@ type AttackSpec struct {
 	Attacker encounter.Combatter
 	Weapon string
 	DamageRoll string
+	DamageAmount int
 }
 
-// db attack TARGET [with WEAPON] [do DAMAGEROLL] [by MONSTER]
+// db attack TARGET [with WEAPON] [do DAMAGEROLL] [by MONSTER] [hp +-NN]
 func ParseAttackArgs(vc VerbContext, args []string) (AttackSpec, error) {
 	if len(args) == 0 {
 		return AttackSpec{}, fmt.Errorf("not enough args at all")
@@ -128,7 +134,7 @@ func ParseAttackArgs(vc VerbContext, args []string) (AttackSpec, error) {
 	spec := AttackSpec{Targets: []encounter.Combatter{}}
 	targets := ""
 	attacker := vc.Character.Name
-
+	
 	targets, args = args[0], args[1:]
 
 	for len(args) >= 2 {
@@ -136,6 +142,9 @@ func ParseAttackArgs(vc VerbContext, args []string) (AttackSpec, error) {
 		case "do":   spec.DamageRoll = args[1]
 		case "with": spec.Weapon = args[1]
 		case "by":   attacker = args[1]
+		case "hp":
+			amount,_ := strconv.Atoi(args[1])
+			spec.DamageAmount = amount
 		}
 		args = args[2:]
 	}
@@ -160,6 +169,20 @@ func ParseAttackArgs(vc VerbContext, args []string) (AttackSpec, error) {
 func (e Encounter)AttackTarget(vc VerbContext, spec AttackSpec) string {
 	if hp,_ := spec.Attacker.GetHP(); hp <= 0 {
 		return fmt.Sprintf("%s is dead ! such cheating", spec.Attacker.GetName())
+	}
+
+	// If there is explicit damage, just apply it
+	if spec.DamageAmount != 0 {
+		str := ""
+		for _,target := range spec.Targets {
+			target.TakeDamage(spec.DamageAmount)
+			str += fmt.Sprintf("%s damaged %s: %+d", spec.Attacker.GetName(), target.GetName(), spec.DamageAmount)
+			if hp,_ := target.GetHP(); hp <= 0 {
+				str += " - they are DEAD"
+			}
+			str += "\n"
+		}
+		return str
 	}
 
 	// If there is an explicit damage roll, just do it

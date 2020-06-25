@@ -72,7 +72,7 @@ func (i Item)Summary() string {
 		s += "damage:"+i.Damage.String()
 
 		if i.WeaponRange == "Ranged" {
-			s += fmt.Sprintf(" range[%.0f,%.0f]", i.Range.Normal, i.Range.Long)
+			s += fmt.Sprintf(" range[%d,%d]", i.Range.Normal, i.Range.Long)
 		}
 
 		isVersatile := false

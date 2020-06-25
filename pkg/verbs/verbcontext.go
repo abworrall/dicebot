@@ -59,13 +59,13 @@ func (vc *VerbContext)Setup() {
 	
 	if vc.User == "" { return }
 
-	vc.loadCharacter()
-	vc.loadEncounter()
+	vc.loadContextCharacter()
+	vc.loadContextEncounter()
 }
 
 func (vc *VerbContext)Teardown() {
-	vc.maybeSaveCharacter()
-	vc.maybeSaveEncounter()
+	vc.maybeSaveContextCharacter()
+	vc.maybeSaveContextEncounter()
 	
 	if len(*vc.Events) > 0 {
 		stateName := "history-state" // FIXME: need a better way to identify singleton state
@@ -86,31 +86,25 @@ func (vc *VerbContext)Teardown() {
 }
 
 // FIXME: replace these with something less awful
-func (vc *VerbContext)characterStateName() string { return fmt.Sprintf("char-state-%s", vc.User) }
+func (vc *VerbContext)characterStateName(name string) string { return fmt.Sprintf("char-state-%s", name) }
 func (vc *VerbContext)encounterStateName() string { return "encounter-state" }
 
-func (vc *VerbContext)loadCharacter() {
-	c := character.NewCharacter()
-	vc.Character = &c
+func (vc *VerbContext)loadContextCharacter() {
 	if vc.User == "" {
 		return
 	}
-	if err := vc.StateManager.ReadState(vc.Ctx, vc.characterStateName(), &c); err != nil {
-		// This will happen on the first ever read of a new character
-		log.Printf("ReadState(%q): %v", vc.characterStateName(), err)
-	}
+	vc.Character = vc.loadCharacter(vc.User)
 }
-func (vc *VerbContext)maybeSaveCharacter() {
+
+func (vc *VerbContext)maybeSaveContextCharacter() {
 	// FIXME: ideally this would check for changes before writing the character
 	if vc.User == "" || vc.Character == nil {
 		return
-	} else if err := vc.StateManager.WriteState(vc.Ctx, vc.characterStateName(), vc.Character); err != nil {
-		log.Printf("%T.WriteState(%s, %T): %v\n", vc.StateManager, vc.characterStateName(), vc.Character, err)
-		return
 	}
+	vc.maybeSaveCharacter(vc.Character)
 }
 
-func (vc *VerbContext)loadEncounter() {
+func (vc *VerbContext)loadContextEncounter() {
 	e := encounter.NewEncounter()
 	vc.Encounter = &e
 	if vc.User == "" {
@@ -120,12 +114,30 @@ func (vc *VerbContext)loadEncounter() {
 		log.Printf("ReadState(%q): %v", vc.encounterStateName(), err)
 	}
 }
-func (vc *VerbContext)maybeSaveEncounter() {
+func (vc *VerbContext)maybeSaveContextEncounter() {
 	// FIXME: ideally this would check for changes before writing the character
 	if vc.User == "" || vc.Encounter == nil {
 		return
 	}
 	if err := vc.StateManager.WriteState(vc.Ctx, vc.encounterStateName(), vc.Encounter); err != nil {
 		log.Printf("%T.WriteState(%q, %T): %v\n", vc.StateManager, vc.encounterStateName(), vc.Encounter, err)
+	}
+}
+
+
+// These routines might be used by other verbs
+func (vc *VerbContext)loadCharacter(name string) *character.Character{
+	c := character.NewCharacter()
+	if err := vc.StateManager.ReadState(vc.Ctx, vc.characterStateName(name), &c); err != nil {
+		// This will happen on the first ever read of a new character
+		log.Printf("ReadState(%q): %v", vc.characterStateName(name), err)
+	}
+	return &c
+}
+
+func (vc *VerbContext)maybeSaveCharacter(c *character.Character) {
+	// FIXME: ideally this would check for changes before writing the character
+	if err := vc.StateManager.WriteState(vc.Ctx, vc.characterStateName(c.Name), c); err != nil {
+		log.Printf("%T.WriteState(%s, %T): %v\n", vc.StateManager, vc.characterStateName(c.Name), c, err)
 	}
 }

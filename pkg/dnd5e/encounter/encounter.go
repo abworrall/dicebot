@@ -28,13 +28,7 @@ func NewEncounter() Encounter {
 func (e Encounter)String() string {
 	if e.IsNil() { return "nah, everyone is chillin'" }
 
-	str := fmt.Sprintf("--{ %d participants }--\n", len(e.Combatants))
-
-	if len(e.Combatants) == 0 {
-		return str
-	}
-
-	str += e.Init.String()+"\n"
+	str := ""
 
 	names := []string{}
 	for _,v := range e.Combatants {
@@ -44,6 +38,8 @@ func (e Encounter)String() string {
 	for _,name := range names {
 		str += CombatterToString(e.Combatants[name]) + "\n"
 	}
+
+	str += "\n" + e.Init.String()
 
 	return str
 }

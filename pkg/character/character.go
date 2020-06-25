@@ -181,3 +181,22 @@ func (c *Character)Get(k string) (int,string) {
 
 	return i,str
 }
+
+
+
+// Summary returns a oneliner
+func (c *Character)Summary() string {
+	str := fmt.Sprintf("[%s] L%d %s, HP:%d/%d", c.Name, c.Level, c.Class, c.CurrHitpoints, c.MaxHitpoints)
+
+	if c.Slots.Max[1] != 0 {
+		str += ", " + c.Slots.String()
+	}
+	if c.Armor != "" {
+		str += ", " + c.Armor
+	}
+	if c.CurrWeapon != "" {
+		str += ", " + c.CurrWeapon
+	}
+
+	return str
+}

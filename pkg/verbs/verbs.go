@@ -26,6 +26,9 @@ func init() {
 	HandleVerb("rules",    Rules{})
 	HandleVerb("vow",     &Vows{})
 	HandleVerb("insult",  &Insult{})
+
+	// Oddball; has its own state (list of names), but reads/writes all characters
+	HandleVerb("party",   &Party{})
 }
 
 // A Verber will respond to a bot command
