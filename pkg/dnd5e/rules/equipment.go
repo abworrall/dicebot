@@ -8,6 +8,12 @@ import(
 type Item struct {
 	Index string `json:"index"`
 	Name string `json:"name"`
+
+	Cost struct {
+		Quantity int `json:"quantity"`
+		Unit string `json:"unit"`
+	} `json:"cost"`
+	
 	EquipmentCategory struct {
 		Name string `json:"name"`
 	} `json:"equipment_category"`
@@ -97,6 +103,8 @@ func (i Item)Summary() string {
 			i.ArmorClass.Base, i.ArmorClass.DexBonus, i.ArmorClass.MaxBonus)
 	}
 
+	s += fmt.Sprintf(" {%d%s, %dlb}", i.Cost.Quantity, i.Cost.Unit, i.Weight)
+	
 	return s
 }
 
