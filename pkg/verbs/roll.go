@@ -67,6 +67,7 @@ func (r Roll)RollAbilityCheck(vc VerbContext, args []string) string {
 		NumDice: 1,
 		DiceSize: 20,
 		Modifier: attrMod,
+		Target: 10, // This is the default DC
 	}
 
 	args = args[1:]

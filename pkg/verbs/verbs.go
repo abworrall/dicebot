@@ -24,6 +24,7 @@ func init() {
 	
 	// Verbs with their own state (not part of character objects)
 	HandleVerb("rules",    Rules{})
+	HandleVerb("list",    &Lists{})
 	HandleVerb("vow",     &Vows{})
 	HandleVerb("insult",  &Insult{})
 
