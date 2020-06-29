@@ -24,7 +24,7 @@ type Combatter interface {
 type Damager interface {
 	GetName() string
 	GetHitModifier() int        // What gets added to the base attack roll
-	GetDamageRoll() string      // e.g. "4d6+3"
+	GetDamageRoll() string      // e.g. "4d6+3". If "", then no damage roll.
 }
 
 func CombatterToString(c Combatter) string {
@@ -50,9 +50,11 @@ func DamagerToString(d Damager) string {
 	str := fmt.Sprintf("(%s: ", d.GetName())
 
 	if mod := d.GetHitModifier(); mod != 0 {
-		str += fmt.Sprintf("hit:%+d, ", mod)
+		str += fmt.Sprintf("hit:%+d", mod)
 	}
-	str += "damage:" + d.GetDamageRoll()
+	if d.GetDamageRoll() != "" {
+		str += ", damage:" + d.GetDamageRoll()
+	}
 
 	return str + ")"
 }

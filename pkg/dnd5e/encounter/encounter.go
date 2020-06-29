@@ -80,16 +80,18 @@ func (e *Encounter)Attack(c1,c2 Combatter, weaponOrAction string) string {
 	str += "Attack - " + hitOutcome.String()
 
 	if hitOutcome.Success {
-		// We hit ! Damage roll !
-		damageRoll := roll.Parse(weapon.GetDamageRoll())
-		damageOutcome := damageRoll.Do()
-		str += " Damage - " + damageOutcome.String()
+		// We hit ! Damage roll ?
+		if weapon.GetDamageRoll() != "" {
+			damageRoll := roll.Parse(weapon.GetDamageRoll())
+			damageOutcome := damageRoll.Do()
+			str += " Damage - " + damageOutcome.String()
 
-		c2.TakeDamage(damageOutcome.Total)
+			c2.TakeDamage(damageOutcome.Total)
 
-		hp,_ := c2.GetHP()
-		if hp == 0 {
-			str += " they are DEAD"
+			hp,_ := c2.GetHP()
+			if hp == 0 {
+				str += " they are DEAD"
+			}
 		}
 	}
 

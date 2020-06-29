@@ -76,12 +76,8 @@ HP: (%d/%d)
 		c.CurrHitpoints, c.MaxHitpoints)
 
 	if c.Armor != "" {
-		armor := rules.TheRules.EquipmentList.LookupFirst(c.Armor)
-		s += fmt.Sprintf("\nArmor: %s", armor.Summary())
-		if c.Shield {
-			s += ", and a shield too"
-		}
-		s += "\n"
+		_,desc := c.GetArmorClass()
+		s += "\nArmor: " + desc + "\n"
 	}
 
 	if len(c.Weapons) > 0 {
@@ -95,18 +91,26 @@ HP: (%d/%d)
 		}
 	}
 
-	if c.Slots.Max[1] > 0 {
-		s += fmt.Sprintf("\n%s\n-- %s", c.SpellsMemorized, c.Slots)
+	if c.IsSpellCaster() {
+		s += c.MagicString()
 	}
+
+	
 	
 	return s
 }
 
+func (c *Character)IsSpellCaster() bool { return c.Slots.Max[1] > 0 }
+
+
 func (c *Character)MagicString() string {
-	if c.Slots.Max[1] == 0 {
+	if !c.IsSpellCaster() {
 		return "You can't do magic :("
 	}
-	return fmt.Sprintf("\n%s\n-- %s", c.SpellsMemorized, c.Slots)
+
+	_,desc := c.GetMagicAttackModifier()
+
+	return fmt.Sprintf("\nSpell Attack Modifier: %s\n\n%s\n--- %s", desc, c.SpellsMemorized, c.Slots)
 }
 
 

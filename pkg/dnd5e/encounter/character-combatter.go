@@ -40,24 +40,7 @@ func (cc CharacterCombatter)TakeDamage(d int) {
 }
 
 func (cc CharacterCombatter)GetArmorClass() int {
-	ac := 10
-
-	dexBonus := cc.GetModifier(character.Dex)
-	
-	if cc.Character.Armor != "" {
-		armor := rules.TheRules.EquipmentList[cc.Character.Armor]
-		ac = armor.ArmorClass.Base
-		if !armor.ArmorClass.DexBonus {
-			// Not allowed with this kind of armor
-			dexBonus = 0
-		}
-	}
-
-	ac += dexBonus
-	if cc.Character.Shield {
-		ac += 2
-	}
-
+	ac,_ := cc.Character.GetArmorClass()
 	return ac
 }
 
@@ -66,10 +49,19 @@ func (cc CharacterCombatter)GetDamagerNames() []string {
 	for k,_ := range cc.Character.Weapons {
 		ret = append(ret, k)
 	}
+
+	if cc.Character.IsSpellCaster() {
+		ret = append(ret, "magic")
+	}
+
 	return ret
 }
 
 func (cc CharacterCombatter)GetDamager(name string) Damager {
+	if name == "magic" {
+		return MagicDamager{Character: cc.Character}
+	}
+
 	if name == "" {
 		name = cc.Character.CurrWeapon
 	}
@@ -117,25 +109,7 @@ func (wd WeaponDamager)	GetName() string {
 }
 
 func (wd WeaponDamager)	GetHitModifier() int {
-	strMod := wd.Character.GetModifier(character.Str)
-	dexMod := wd.Character.GetModifier(character.Dex)
-
-	mod := 0
-
-	// First, basic attr bonus (melee or ranged)
-	switch wd.Item.WeaponRange {
-	case "Melee":  mod = strMod
-	case "Ranged": mod = dexMod
-	}
-
-	if wd.Item.HasProperty("Finesse") {
-		if strMod > dexMod {
-			mod = strMod
-		} else {
-			mod = dexMod
-		}
-	}
-	
+	mod,_ := wd.Character.GetWeaponAttackModifier(wd.Item)
 	return mod
 }
 
@@ -151,4 +125,18 @@ func (wd WeaponDamager)	GetDamageRoll() string {
 
 	return str
 }
+
+
+// MagicDamager is a shim to represent a magic attack; it has no
+// damage, since that's all handed separately.
+type MagicDamager struct {
+	character.Character
+}
+func (md MagicDamager)GetName() string { return "magic" }
+func (md MagicDamager)GetDamageRoll() string { return "" }
+func (md MagicDamager)GetHitModifier() int {
+	mod,_ := md.Character.GetMagicAttackModifier()
+	return mod
+}
+
 

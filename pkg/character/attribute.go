@@ -40,21 +40,6 @@ func ParseAttr(s string) AttrKind {
 	}
 }
 
-func AttrModifier(attrVal int) int {
-	// Kinda horrible lookup table
-	var attrModifiers = []int{
-		0,-5,-4,-4,          // attr scores 0-3
-		-3,-3,-2,-2,-1,-1,   // attr scores 4-9
-		0,0,1,1,2,2,         // attr scores 10-15
-		3,3,4,4,5,5,         // attr scores 16-21
-		6,6,7,7,8,8,9,9,10,  // attr scores 22-30
-	}
-	if attrVal<0 || attrVal>len(attrModifiers) {
-		return 0
-	}
-	return attrModifiers[attrVal]
-}
-
 func (c Character)GetAttr(k AttrKind) int {
 	switch k {
 	case Str: return c.Str
@@ -74,4 +59,26 @@ func (c Character)GetModifier(k AttrKind) int {
 
 func (c Character)GetAttrAndModifier(k AttrKind) (int,int) {
 	return c.GetAttr(k), AttrModifier(c.GetAttr(k))
+}
+
+
+func (c *Character)GetSpellcastingAbilityAttr() AttrKind {
+	switch c.Class {
+	case "wizard":
+		return Int
+
+	case "ranger": fallthrough
+	case "cleric": fallthrough
+	case "druid":
+		return Wis
+
+	case "bard": fallthrough
+	case "paladin": fallthrough
+	case "warlock": fallthrough
+	case "sorceror":
+		return Cha
+		
+	default:
+		return Undef
+	}
 }

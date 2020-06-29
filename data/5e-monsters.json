@@ -17934,6 +17934,7 @@
     ],
     "url": "/api/monsters/goblin"
   },
+
   {
     "index": "gold-dragon-wyrmling",
     "name": "Gold Dragon Wyrmling",
@@ -37898,5 +37899,62 @@
       }
     ],
     "url": "/api/monsters/zombie"
+  },
+
+  {
+    "index": "redbrand",
+    "name": "Redbrand Ruffian",
+    "size": "Medium",
+    "type": "humanoid",
+    "subtype": "human",
+    "alignment": "neutral evil",
+    "armor_class": 14,
+    "hit_points": 16,
+    "hit_dice": "3d8",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "strength": 11,
+    "dexterity": 14,
+    "constitution": 12,
+    "intelligence": 9,
+    "wisdom": 9,
+    "charisma": 11,
+    "proficiencies": [
+    ],
+    "damage_vulnerabilities": [],
+    "damage_resistances": [],
+    "damage_immunities": [],
+    "condition_immunities": [],
+    "senses": {
+      "darkvision": "60 ft.",
+      "passive_perception": 9
+    },
+    "languages": "Common",
+    "challenge_rating": 0.5,
+    "special_abilities": [
+      {
+        "name": "Multiattack",
+        "desc": "Can make two attacks in one turn."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Shortsword",
+        "desc": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage.",
+        "attack_bonus": 4,
+        "damage": [
+          {
+            "damage_type": {
+              "name": "Slashing",
+              "url": "/api/damage-types/slashing"
+            },
+            "damage_dice": "1d6",
+            "damage_bonus": 2
+          }
+        ]
+      }
+    ],
+    "url": "/api/monsters/goblin"
   }
 ]
