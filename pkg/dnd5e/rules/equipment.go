@@ -75,26 +75,18 @@ func (i Item)Summary() string {
 
 	if i.WeaponCategory != "" {
 		// It's a weapon !
-		s += "damage:"+i.Damage.String()
+		s += i.WeaponDamageString()
 
 		if i.WeaponRange == "Ranged" {
 			s += fmt.Sprintf(" range[%d,%d]", i.Range.Normal, i.Range.Long)
 		}
 
-		isVersatile := false
 		if len(i.Properties) > 0 {
 			props := make([]string, len(i.Properties))
 			for j,p := range i.Properties {
 				props[j] = p.Name
-				if p.Name == "Versatile" {
-					isVersatile = true
-				}
 			}
 			s += fmt.Sprintf(" [%s]", strings.Join(props, ","))
-		}
-
-		if isVersatile {
-			s += fmt.Sprintf(" 2-handed damage:"+i.Damage2H.String())
 		}
 
 	} else if i.ArmorCategory != "" {
@@ -105,6 +97,15 @@ func (i Item)Summary() string {
 
 	s += fmt.Sprintf(" {%d%s, %dlb}", i.Cost.Quantity, i.Cost.Unit, i.Weight)
 	
+	return s
+}
+
+func (i Item)WeaponDamageString() string {
+	if i.WeaponCategory == "" { return "" }
+	s := "damage:"+i.Damage.String()
+	if i.Damage2H.DamageDice != "" {
+		s += " (2h_damage:"+i.Damage2H.String()+")"
+	}
 	return s
 }
 

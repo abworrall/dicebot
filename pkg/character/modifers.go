@@ -82,8 +82,6 @@ func (c *Character)GetMagicAttackModifier() (int, string) {
 	// Then, proficiency bonus !
 	mod += c.ProficiencyBonus()
 	frags = append(frags, fmt.Sprintf("{proficiency: %+d}", c.ProficiencyBonus()))
-
-
 	frags = append(frags, fmt.Sprintf("{total:%+d}", mod))
 
 	return mod, strings.Join(frags, " ")
@@ -101,7 +99,7 @@ func (c *Character)GetWeaponAttackModifier(w rules.Item) (int, string) {
 			frags = append(frags, fmt.Sprintf("{finesse; picked str:%+d}", strMod))
 			mod = strMod
 		} else {
-			frags = append(frags, fmt.Sprintf("{finesse; picked dex:%+d}", strMod))
+			frags = append(frags, fmt.Sprintf("{finesse; picked dex:%+d}", dexMod))
 			mod = dexMod
 		}
 
@@ -121,6 +119,7 @@ func (c *Character)GetWeaponAttackModifier(w rules.Item) (int, string) {
 	// Then, proficiency bonus !
 	mod += c.ProficiencyBonus()
 	frags = append(frags, fmt.Sprintf("{proficiency: %+d}", c.ProficiencyBonus()))
-	
+	frags = append(frags, fmt.Sprintf("{total:%+d}", mod))
+
 	return mod, strings.Join(frags, " ")
 }

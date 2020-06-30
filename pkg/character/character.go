@@ -72,11 +72,12 @@ HP: (%d/%d)
 	if len(c.Weapons) > 0 {
 		s += "\n--{ Weapons }--\n"
 		for name,_ := range c.Weapons {
-			w := rules.TheRules.EquipmentList.LookupFirst(name)
+			w := rules.TheRules.EquipmentList[name]
 
 			prefix := "   "
 			if c.CurrWeapon == name { prefix = "** " }
-			s += fmt.Sprintf("%s%s\n", prefix, w.Summary())
+			hitMod,hitModDesc := c.GetWeaponAttackModifier(w)
+			s += fmt.Sprintf("%s%s, hit:%+d %s\n", prefix, w.WeaponDamageString(), hitMod, hitModDesc)
 		}
 	}
 

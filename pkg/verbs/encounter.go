@@ -59,6 +59,9 @@ func (e Encounter)Process(vc VerbContext, args []string) string {
 	return e.AttackTarget(vc, attackSpec)
 }
 
+// AddPlayer adds a PC to the encounter. Subsequent calls on the same
+// PC reimport the character (i.e. with new weapons), resetting HP,
+// but retaining init.
 func (e Encounter)AddPlayer(vc VerbContext) string {
 	if vc.Character == nil {
 		return "nah"
@@ -67,8 +70,13 @@ func (e Encounter)AddPlayer(vc VerbContext) string {
 	c := encounter.NewCombatterFromCharacter(*vc.Character)
 	vc.Encounter.Add(c)
 
-	initVal,initStr := encounter.CombatterRollInitiative(c)
-	vc.Encounter.Init.Set(vc.Character.Name,initVal)
+	initStr := ""
+	if initVal := vc.Encounter.Init.Get(vc.Character.Name); initVal > 0 {
+		initStr = fmt.Sprintf("%s already has initiative - it is %d", vc.Character.Name, initVal)
+	} else {
+		initVal,initStr = encounter.CombatterRollInitiative(c)
+		vc.Encounter.Init.Set(vc.Character.Name, initVal)
+	}
 
 	return fmt.Sprintf("%s has joined the fray (init: %s)", vc.Character.Name, initStr)
 }
