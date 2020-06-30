@@ -27,8 +27,6 @@ func (s Spells)Process(vc VerbContext, args []string) string {
 
 	switch args[0] {
 	case "-flush":
-		vc.Character.Spellbook = character.NewSpellbook()   // OLD
-		vc.Character.SpellSlots = character.NewSpellSlots() // OLD
 		vc.Character.SpellsMemorized = spells.NewSet()
 		vc.Character.Slots = spells.NewSlots()
 		return "(flushed)"

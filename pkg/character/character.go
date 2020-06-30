@@ -23,29 +23,18 @@ type Character struct {
 	CurrWeapon string
 	Armor string
 	Shield bool
-	
-	Inventory
 
-	//// OLD, kill off when safe
-	//
-	Spellbook
-	SpellSlots
-	//
-	////
-
-	// The new shiny
 	SpellsMemorized spells.Set
 	Slots spells.Slots
+
+	Inventory
 }
 
 func NewCharacter() Character {
 	return Character{
-		Inventory: NewInventory(),
-		Spellbook: NewSpellbook(),
-		SpellSlots: NewSpellSlots(),
 		Weapons: map[string]int{},
-
 		SpellsMemorized: spells.NewSet(),
+		Inventory: NewInventory(),
 	}
 }
 
