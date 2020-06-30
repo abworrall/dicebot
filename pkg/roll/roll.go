@@ -91,6 +91,15 @@ func (o Outcome)String() string {
 			s += " - failed"
 		}
 	}
+
+	if o.Roll.NumDice == 1 && o.Roll.DiceSize == 20 {
+		if o.CriticalHit {
+			s += " (CRITICAL HIT !!!)"
+		} else if o.CriticalMiss {
+			s += " (critical miss :/ )"
+		}
+	}
+
 	return s
 }
 
