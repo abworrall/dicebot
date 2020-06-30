@@ -134,6 +134,7 @@ type AttackSpec struct {
 }
 
 // db attack TARGET [with WEAPON] [do DAMAGEROLL] [by MONSTER] [hp +-NN]
+// TODO: withadvantage, for attack rolls
 func ParseAttackArgs(vc VerbContext, args []string) (AttackSpec, error) {
 	if len(args) == 0 {
 		return AttackSpec{}, fmt.Errorf("not enough args at all")

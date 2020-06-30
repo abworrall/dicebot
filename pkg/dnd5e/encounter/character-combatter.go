@@ -2,7 +2,6 @@ package encounter
 
 import(
 	"encoding/gob"
-	"fmt"
 
 	"github.com/abworrall/dicebot/pkg/character"
 	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
@@ -103,29 +102,12 @@ type WeaponDamager struct {
 	character.Character
 	rules.Item
 }
-
-func (wd WeaponDamager)	GetName() string {
-	return wd.Item.Index
-}
-
+func (wd WeaponDamager)	GetName() string { return wd.Item.Index }
+func (wd WeaponDamager)	GetDamageRoll() string { return wd.Character.GetWeaponDamageRoll(wd.Item) }
 func (wd WeaponDamager)	GetHitModifier() int {
 	mod,_ := wd.Character.GetWeaponAttackModifier(wd.Item)
 	return mod
 }
-
-func (wd WeaponDamager)	GetDamageRoll() string {
-	str := wd.Item.Damage.DamageDice
-
-	bonus := wd.Item.Damage.DamageBonus  // maybe magic items have this ?
-	bonus += wd.GetHitModifier()         // what goes for attack, goes for damage
-	
-	if bonus != 0 {
-		str += fmt.Sprintf("%+d", bonus)
-	}
-
-	return str
-}
-
 
 // MagicDamager is a shim to represent a magic attack; it has no
 // damage, since that's all handed separately.

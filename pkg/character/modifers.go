@@ -73,6 +73,22 @@ func (c *Character)GetArmorClass() (int, string) {
 	return ac, strings.Join(frags, " ")
 }
 
+func (c *Character)GetWeaponDamageRoll(w rules.Item) string {
+	str := w.Damage.DamageDice
+
+	bonus := w.Damage.DamageBonus  // maybe magic items have this ?
+	mod,_ := c.GetWeaponDamageModifier(w)
+	bonus += mod
+
+	if bonus != 0 {
+		str += fmt.Sprintf("%+d", bonus)
+	}
+
+	return str
+}
+
+// https://rpg.stackexchange.com/questions/72910/how-do-i-figure-the-dice-and-bonuses-for-attack-rolls-and-damage-rolls
+
 // For when the character casts a spell, and needs a 'magic attack roll'
 func (c *Character)GetMagicAttackModifier() (int, string) {
 	attr := c.GetSpellcastingAbilityAttr()
@@ -88,6 +104,31 @@ func (c *Character)GetMagicAttackModifier() (int, string) {
 }
 
 func (c *Character)GetWeaponAttackModifier(w rules.Item) (int, string) {
+	// Start off with the basic ability modifier
+	mod, desc := c.GetWeaponAbilityModifier(w)
+	frags := []string{desc}
+
+	// Then, proficiency bonus !
+	mod += c.ProficiencyBonus()
+	frags = append(frags, fmt.Sprintf("{proficiency: %+d}", c.ProficiencyBonus()))
+	frags = append(frags, fmt.Sprintf("{total:%+d}", mod))
+
+	return mod, strings.Join(frags, " ")
+}
+
+func (c *Character)GetWeaponDamageModifier(w rules.Item) (int, string) {
+	// Start off with the basic ability modifier
+	mod, desc := c.GetWeaponAbilityModifier(w)
+	frags := []string{desc}
+
+	// No proficiency bonus for damage.
+	
+	return mod, strings.Join(frags, " ")
+}
+
+// GetWeaponAbilityModifier computes the modifier deriving from the character's
+// ability for the given weapon.
+func (c *Character)GetWeaponAbilityModifier(w rules.Item) (int, string) {
 	strMod := c.GetModifier(Str)
 	dexMod := c.GetModifier(Dex)
 
@@ -96,10 +137,10 @@ func (c *Character)GetWeaponAttackModifier(w rules.Item) (int, string) {
 
 	if w.HasProperty("Finesse") {
 		if strMod > dexMod {
-			frags = append(frags, fmt.Sprintf("{finesse; picked str:%+d}", strMod))
+			frags = append(frags, fmt.Sprintf("{finesse; str:%+d}", strMod))
 			mod = strMod
 		} else {
-			frags = append(frags, fmt.Sprintf("{finesse; picked dex:%+d}", dexMod))
+			frags = append(frags, fmt.Sprintf("{finesse; dex:%+d}", dexMod))
 			mod = dexMod
 		}
 
@@ -115,11 +156,6 @@ func (c *Character)GetWeaponAttackModifier(w rules.Item) (int, string) {
 			frags = append(frags, fmt.Sprintf("{ranged; dex:%+d}", dexMod))
 		}
 	}
-
-	// Then, proficiency bonus !
-	mod += c.ProficiencyBonus()
-	frags = append(frags, fmt.Sprintf("{proficiency: %+d}", c.ProficiencyBonus()))
-	frags = append(frags, fmt.Sprintf("{total:%+d}", mod))
 
 	return mod, strings.Join(frags, " ")
 }

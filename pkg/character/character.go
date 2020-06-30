@@ -70,14 +70,19 @@ HP: (%d/%d)
 	}
 
 	if len(c.Weapons) > 0 {
+
 		s += "\n--{ Weapons }--\n"
 		for name,_ := range c.Weapons {
-			w := rules.TheRules.EquipmentList[name]
-
 			prefix := "   "
 			if c.CurrWeapon == name { prefix = "** " }
+			s += fmt.Sprintf("%s [%s] ", prefix, name)
+			
+			w := rules.TheRules.EquipmentList[name]
 			hitMod,hitModDesc := c.GetWeaponAttackModifier(w)
-			s += fmt.Sprintf("%s%s, hit:%+d %s\n", prefix, w.WeaponDamageString(), hitMod, hitModDesc)
+			damageRoll := c.GetWeaponDamageRoll(w)
+			_,damModDesc := c.GetWeaponDamageModifier(w)
+
+			s += fmt.Sprintf("hit:%+d, dam:%s, hit(%s), damage(%s)\n", hitMod, damageRoll, hitModDesc, damModDesc)
 		}
 	}
 
