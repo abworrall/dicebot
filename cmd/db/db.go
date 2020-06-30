@@ -11,13 +11,17 @@ import(
 	"github.com/abworrall/dicebot/pkg/state"
 )
 
+// run this from the mnain dicebot dir, to puck up ./rules
+
 func main() {
 	rules.Init("./data/")
+
+	homedir,_ := os.UserHomeDir()
 
 	b := bot.New("dicebot", "db")
 	vc := verbs.VerbContext{
 		ExternalUserId: "ABCDEF123456",
-		StateManager: state.FileStateManager{"/home/abw/db-state"},
+		StateManager: state.FileStateManager{homedir + "/var/dicebot"},
 	}
 
 /* Sadly, this all dies :(
