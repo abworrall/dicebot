@@ -58,6 +58,12 @@ func (c *Character)GetArmorClass() (int, string) {
 			}
 		}
 
+		// This only applies when wearing armor
+		if c.HasBuff(BuffFighterFightingStyleDefense) {
+			ac += 1
+			frags = append(frags, fmt.Sprintf("{feature:defense %+d}", 1))
+		}
+		
 	} else {
 		frags = append(frags, "{no armor; AC=10}")
 	}
@@ -66,11 +72,6 @@ func (c *Character)GetArmorClass() (int, string) {
 	if c.Shield {
 		ac += 2
 		frags = append(frags, fmt.Sprintf("{shield %+d}", 2))
-	}
-
-	if c.HasClassFeature(ClassFeatureDefense) {
-		ac += 1
-		frags = append(frags, fmt.Sprintf("{feature:defense %+d}", 1))
 	}
 
 	frags = append(frags, fmt.Sprintf("{final AC=%d}", ac))

@@ -57,6 +57,8 @@ func (mc MonsterCombatter)GetAttr(k character.AttrKind) int {
 	}
 }
 
+func (mc MonsterCombatter)HasBuff(b character.Buff) bool { return false }
+
 func (mc MonsterCombatter)GetDamagerNames() []string {
 	ret := make ([]string, len(mc.Monster.Actions))
 	for i,_ := range mc.Monster.Actions {

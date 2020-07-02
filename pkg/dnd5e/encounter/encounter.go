@@ -2,9 +2,11 @@ package encounter
 
 import(
 	"fmt"
+	"log"
 	"sort"
 
 	"github.com/abworrall/dicebot/pkg/roll"
+	"github.com/abworrall/dicebot/pkg/character"
 )
 
 type Encounter struct {
@@ -67,15 +69,21 @@ func (e *Encounter)Attack(c1,c2 Combatter, weaponOrAction string) string {
 		return fmt.Sprintf("%s did not have a '%s'", c1.GetName(), weaponOrAction)
 	}
 
+	// TODO: we need some extra context info at this point.
+	//  1. Is there adv/disadv ?
+
 	// Build the hit roll
 	hitRoll := roll.Roll{
 		NumDice: 1,
 		DiceSize: 20,
 		Modifier: weapon.GetHitModifier(),
 		Target: c2.GetArmorClass(),
-		// TODO: figure out how to wedge advantage/disadvantage into this; maybe bring AttackSpec to this layer ?
+
+		WithImprovedCritical: c1.HasBuff(character.BuffFighterChampionImprovedCritical),
 	}
 
+	log.Printf("%#v\n\n", hitRoll)
+	
 	hitOutcome := hitRoll.Do()
 	str += "Attack - " + hitOutcome.String()
 

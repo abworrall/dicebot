@@ -17,6 +17,8 @@ type Combatter interface {
 	GetHP() (int, int)
 	GetAttr(character.AttrKind) int // Lookup Str,Dex, etc
 
+	HasBuff(character.Buff) bool
+
 	TakeDamage(d int)
 }
 

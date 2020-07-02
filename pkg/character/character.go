@@ -30,7 +30,7 @@ type Character struct {
 	SpellsMemorized spells.Set
 	Slots spells.Slots
 
-	ClassFeatures map[string]int
+	Buffs map[Buff]int
 
 	Inventory
 }
@@ -39,7 +39,7 @@ func NewCharacter() Character {
 	return Character{
 		Weapons: map[string]int{},
 		SpellsMemorized: spells.NewSet(),
-		ClassFeatures: map[string]int{},
+		Buffs: map[Buff]int{},
 		Inventory: NewInventory(),
 	}
 }
@@ -81,13 +81,20 @@ HP: (%d/%d)
 	_,desc := c.GetArmorClass()
 	s += "\nArmorClass: " + desc + "\n"
 
-	if len(c.ClassFeatures) > 0 {
-		s += "\n--{ Class Features }--\n"
-		for name,_ := range c.ClassFeatures {
-			s += name + "\n"
+	if len(c.Buffs) > 0 {
+		s += "\n--{ Buffs }--\n"
+		for name,_ := range c.Buffs {
+			s += string(name) + "\n"
 		}
 	}
 
+	autobuffs := c.AutoBuffs()
+	if len(autobuffs) > 0 {
+		for name,_ := range autobuffs {
+			s += "(auto) " + string(name) + "\n"
+		}
+	}
+	
 	if len(c.Weapons) > 0 {
 		s += "\n--{ Weapons }--\n"
 		for name,_ := range c.Weapons {
@@ -139,7 +146,10 @@ func (c *Character)Set(k,v string) string {
 	case "subclass": c.Subclass = v
 	case "alignment": c.Alignment = v
 
-	case "classfeature": c.ClassFeatures[v] = 1
+	case "buff":
+		if err := c.AddBuff(Buff(v)); err != nil {
+			return fmt.Sprintf("bad bugg: %v", err)
+		}
 
 	case "weapon":
 		if ! rules.TheRules.IsWeapon(v) {
