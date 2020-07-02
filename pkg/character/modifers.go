@@ -43,7 +43,7 @@ func (c *Character)GetArmorClass() (int, string) {
 	if c.Armor != "" {
 		armor := rules.TheRules.EquipmentList[c.Armor]
 		ac = armor.ArmorClass.Base
-		frags = append(frags, fmt.Sprintf("{%s; AC=%d}", armor.Index, ac))
+		frags = append(frags, fmt.Sprintf("{%s; base AC=%d}", armor.Index, ac))
 
 		// Apply various restrictions on the dex bonus
 		if !armor.ArmorClass.DexBonus {
@@ -68,7 +68,12 @@ func (c *Character)GetArmorClass() (int, string) {
 		frags = append(frags, fmt.Sprintf("{shield %+d}", 2))
 	}
 
-	frags = append(frags, fmt.Sprintf("{final AC:%d}", ac))
+	if c.HasClassFeature(ClassFeatureDefense) {
+		ac += 1
+		frags = append(frags, fmt.Sprintf("{feature:defense %+d}", 1))
+	}
+
+	frags = append(frags, fmt.Sprintf("{final AC=%d}", ac))
 
 	return ac, strings.Join(frags, " ")
 }

@@ -12,8 +12,11 @@ import(
 type Character struct {
 	Name string
 	Race string
+
 	Class string
+	Subclass string
 	Level int
+
 	Alignment string
 	Str,Int,Wis,Con,Cha,Dex,Per int
 	MaxHitpoints int
@@ -27,6 +30,8 @@ type Character struct {
 	SpellsMemorized spells.Set
 	Slots spells.Slots
 
+	ClassFeatures map[string]int
+
 	Inventory
 }
 
@@ -34,14 +39,20 @@ func NewCharacter() Character {
 	return Character{
 		Weapons: map[string]int{},
 		SpellsMemorized: spells.NewSet(),
+		ClassFeatures: map[string]int{},
 		Inventory: NewInventory(),
 	}
 }
 
 func (c Character)String() string {
+	subclass := ""
+	if c.Subclass != "" {
+		subclass = ", " + c.Subclass
+	}
+
 	s := fmt.Sprintf(`--{ %s }--
 Race: %s
-Class: %s (%d)
+Class: %s (%d)%s
 Alignment: %s
 
 STR: %2d (%+d)
@@ -54,7 +65,10 @@ PER: %2d (%+d)
 
 HP: (%d/%d)
 `,
-		c.Name, c.Race, c.Class, c.Level, c.Alignment,
+		c.Name,
+		c.Race,
+		c.Class, c.Level, subclass,
+		c.Alignment,
 		c.Str, AttrModifier(c.Str),
 		c.Int, AttrModifier(c.Int),
 		c.Wis, AttrModifier(c.Wis),
@@ -64,13 +78,17 @@ HP: (%d/%d)
 		c.Per, AttrModifier(c.Per),
 		c.CurrHitpoints, c.MaxHitpoints)
 
-	if c.Armor != "" {
-		_,desc := c.GetArmorClass()
-		s += "\nArmor: " + desc + "\n"
+	_,desc := c.GetArmorClass()
+	s += "\nArmorClass: " + desc + "\n"
+
+	if len(c.ClassFeatures) > 0 {
+		s += "\n--{ Class Features }--\n"
+		for name,_ := range c.ClassFeatures {
+			s += name + "\n"
+		}
 	}
 
 	if len(c.Weapons) > 0 {
-
 		s += "\n--{ Weapons }--\n"
 		for name,_ := range c.Weapons {
 			prefix := "   "
@@ -91,8 +109,6 @@ HP: (%d/%d)
 		s += c.MagicString()
 	}
 
-	
-	
 	return s
 }
 
@@ -120,7 +136,10 @@ func (c *Character)Set(k,v string) string {
 	case "name": c.Name = v
 	case "race": c.Race = v
 	case "class": c.Class = v
+	case "subclass": c.Subclass = v
 	case "alignment": c.Alignment = v
+
+	case "classfeature": c.ClassFeatures[v] = 1
 
 	case "weapon":
 		if ! rules.TheRules.IsWeapon(v) {
@@ -164,6 +183,7 @@ func (c *Character)Get(k string) (int,string) {
 	case "name": str = c.Name
 	case "race": str = c.Race
 	case "class": str = c.Class
+	case "subclass": str = c.Subclass
 	case "alignment": str = c.Alignment
 
 	case "str": i = c.Str
@@ -182,11 +202,15 @@ func (c *Character)Get(k string) (int,string) {
 	return i,str
 }
 
-
-
 // Summary returns a oneliner
 func (c *Character)Summary() string {
-	str := fmt.Sprintf("[%s] L%d %s, HP:%d/%d", c.Name, c.Level, c.Class, c.CurrHitpoints, c.MaxHitpoints)
+	subclass := ""
+
+	if c.Subclass != "" {
+		subclass = "{"+c.Subclass+"}"
+	}
+
+	str := fmt.Sprintf("[%s] L%d %s%s, HP:%d/%d", c.Name, c.Level, c.Class, subclass, c.CurrHitpoints, c.MaxHitpoints)
 
 	if c.Slots.Max[1] != 0 {
 		str += ", " + c.Slots.String()

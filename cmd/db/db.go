@@ -17,11 +17,12 @@ func main() {
 	rules.Init("./data/")
 
 	homedir,_ := os.UserHomeDir()
+	statedir := homedir + "/var/dicebot"
 
 	b := bot.New("dicebot", "db")
 	vc := verbs.VerbContext{
 		ExternalUserId: "ABCDEF123456",
-		StateManager: state.FileStateManager{homedir + "/var/dicebot"},
+		StateManager: state.FileStateManager{statedir},
 	}
 
 /* Sadly, this all dies :(
@@ -46,7 +47,6 @@ go.opencensus.io/trace.StartSpan(0x0, 0x0, 0xb1f1ed, 0x21, 0x0, 0x0, 0x0, 0x106c
 */
 
 	reader := bufio.NewReader(os.Stdin)
-
 	
 	for {
 		fmt.Print("> ")

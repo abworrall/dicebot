@@ -26,7 +26,7 @@ func (c Character)Process(vc VerbContext, args []string) string {
 
 	case "list":
 		return "[Useful fields: weapon, armor, shield]\n"+
-			"[Less useful fields: race, class, alignment, level, mazhp, hp, str, int, wis, con, cha, dex per]"
+			"[Less useful fields: race, class, alignment, level, maxhp, classfeature, hp, str, int, wis, con, cha, dex per]"
 
 	case "setstats":
 		if len(args) != 8 { return "`setstats 1 2 3 4 5 6 7`, plz" }

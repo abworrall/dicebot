@@ -132,6 +132,7 @@ func (vc *VerbContext)loadCharacter(name string) *character.Character{
 		// This will happen on the first ever read of a new character
 		log.Printf("ReadState(%q): %v", vc.characterStateName(name), err)
 	}
+
 	return &c
 }
 
