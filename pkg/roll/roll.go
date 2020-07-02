@@ -23,9 +23,10 @@ type Roll struct {
 	Modifier int
 
 	// These options only apply to 1d20 rolls
-	Target            int
-	WithAdvantage     bool
-	WithDisadvantage  bool
+	Target               int
+	WithAdvantage        bool
+	WithDisadvantage     bool
+	WithImprovedCritical bool  // Means you get a critical hit on 19 as well as 20
 	
 	Reason   string
 }
@@ -94,7 +95,11 @@ func (o Outcome)String() string {
 
 	if o.Roll.NumDice == 1 && o.Roll.DiceSize == 20 {
 		if o.CriticalHit {
-			s += " (CRITICAL HIT !!!)"
+			if o.Dice[0] == 19 {
+				s += " (IMPROVED CRITICAL HIT !!!)"
+			} else {
+				s += " (CRITICAL HIT !!!)"
+			}
 		} else if o.CriticalMiss {
 			s += " (critical miss :/ )"
 		}
@@ -137,6 +142,7 @@ func (r Roll)Do() Outcome {
 	if r.NumDice == 1 && r.DiceSize == 20 {
 		switch o.Dice[0] {
 		case  1: o.CriticalMiss = true
+		case 19: o.CriticalHit  = r.WithImprovedCritical  // 19 is a crit hit when this is set
 		case 20: o.CriticalHit  = true
 		}
 	}
@@ -147,8 +153,13 @@ func (r Roll)Do() Outcome {
 
 	o.Total += r.Modifier
 
-	if r.Target > 0 && o.Total >= r.Target {
-		o.Success = true
+	// Critical hits always succeed; critical misses always miss
+	if r.Target > 0 {
+		switch {
+		case o.CriticalHit:   o.Success = true
+		case o.CriticalMiss:  o.Success = false
+		default:              o.Success = (o.Total >= r.Target)
+		}
 	}
 	
 	return o

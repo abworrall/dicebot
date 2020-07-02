@@ -83,6 +83,13 @@ func (e *Encounter)Attack(c1,c2 Combatter, weaponOrAction string) string {
 		// We hit ! Damage roll ?
 		if weapon.GetDamageRoll() != "" {
 			damageRoll := roll.Parse(weapon.GetDamageRoll())
+
+			if hitOutcome.CriticalHit {
+				// Twice as many damage dice !
+				str += " DOUBLE DICE"
+				damageRoll.NumDice *= 2
+			}
+
 			damageOutcome := damageRoll.Do()
 			str += " Damage - " + damageOutcome.String()
 

@@ -75,9 +75,10 @@ HP: (%d/%d)
 		for name,_ := range c.Weapons {
 			prefix := "   "
 			if c.CurrWeapon == name { prefix = "** " }
-			s += fmt.Sprintf("%s [%s] ", prefix, name)
-			
 			w := rules.TheRules.EquipmentList[name]
+
+			s += fmt.Sprintf("%s [%s/%s] ", prefix, name, w.WeaponCategory)
+
 			hitMod,hitModDesc := c.GetWeaponAttackModifier(w)
 			damageRoll := c.GetWeaponDamageRoll(w)
 			_,damModDesc := c.GetWeaponDamageModifier(w)

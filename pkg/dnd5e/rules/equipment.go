@@ -75,7 +75,7 @@ func (i Item)Summary() string {
 
 	if i.WeaponCategory != "" {
 		// It's a weapon !
-		s += i.WeaponDamageString()
+		s += "[" + i.WeaponCategory + "] " + i.WeaponDamageString()
 
 		if i.WeaponRange == "Ranged" {
 			s += fmt.Sprintf(" range[%d,%d]", i.Range.Normal, i.Range.Long)
