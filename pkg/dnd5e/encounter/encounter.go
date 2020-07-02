@@ -2,7 +2,6 @@ package encounter
 
 import(
 	"fmt"
-	"log"
 	"sort"
 
 	"github.com/abworrall/dicebot/pkg/roll"
@@ -82,8 +81,6 @@ func (e *Encounter)Attack(c1,c2 Combatter, weaponOrAction string) string {
 		WithImprovedCritical: c1.HasBuff(character.BuffFighterChampionImprovedCritical),
 	}
 
-	log.Printf("%#v\n\n", hitRoll)
-	
 	hitOutcome := hitRoll.Do()
 	str += "Attack - " + hitOutcome.String()
 
