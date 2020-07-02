@@ -57,7 +57,7 @@ func (mc MonsterCombatter)GetAttr(k character.AttrKind) int {
 	}
 }
 
-func (mc MonsterCombatter)HasBuff(b character.Buff) bool { return false }
+func (mc MonsterCombatter)HasBuff(b string) bool { return false }
 
 func (mc MonsterCombatter)GetDamagerNames() []string {
 	ret := make ([]string, len(mc.Monster.Actions))
@@ -80,7 +80,6 @@ func (mc MonsterCombatter)GetDamager(name string) Damager {
 	}
 	return nil
 }
-
 
 // ActionDamager wraps up a monster action (from rules) as a Damager
 type ActionDamager struct {

@@ -1,18 +1,28 @@
 package character
 
-import "fmt"
+import(
+	"fmt"
+	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+)
 
 // Various class-specific guff - subtypes, class features, etc.
 
-type Buff string
-
 const(
-	// If you add a new one, also add to the switch in AddBuff below
-	BuffFighterChampionImprovedCritical  Buff = "improved-critical"
-	BuffFighterFightingStyleDefense      Buff = "defense"  // Adds +1 to AC
+	// This list is for buffs that we make use of elsewhere in the bot 
+	BuffFighterChampionImprovedCritical = "improved-critical"
+	BuffFighterFightingStyleDefense = "fighter-fighting-style-defense"
 )
 
-func (c *Character)HasBuff(b Buff) bool {
+func (c *Character)AddBuff(b string) error {
+	if _,exists := rules.TheRules.BuffList[b]; !exists {
+		return fmt.Errorf("Buff '%s' not known", b)
+	}
+
+	c.Buffs[b] = 1
+	return nil
+}
+
+func (c *Character)HasBuff(b string) bool {
 	autobuffs := c.AutoBuffs()
 
 	_,exists1 := c.Buffs[b]
@@ -21,28 +31,14 @@ func (c *Character)HasBuff(b Buff) bool {
 	return exists1 || exists2
 }
 
-func (c *Character)AddBuff(b Buff) error {
-	switch b {
-	case BuffFighterChampionImprovedCritical: fallthrough
-	case BuffFighterFightingStyleDefense:
-		c.Buffs[b] = 1
-		return nil
-
-	default:
-		return fmt.Errorf("Buff '%s' not known", b)
-	}
-}
-
 // Autobuffs returns a list of the buffs you get automatically just
 // because of class/subclass/level/race.
-func (c *Character)AutoBuffs() map[Buff]int {
-	m := map[Buff]int{}
+func (c *Character)AutoBuffs() map[string]int {
+	m := map[string]int{}
 
-	// Consider rebasing on top of https://github.com/bagelbits/5e-database/blob/master/src/5e-SRD-Features.json
-	if c.Class == "fighter" {
-		if c.Subclass == "champion" {
-			if c.Level >= 3 { m[BuffFighterChampionImprovedCritical] = 1 }
-		}
+	ruleBuffs := rules.TheRules.BuffList.ForClass(c.Class, c.Subclass, c.Level)
+	for _,ruleBuff := range ruleBuffs {
+		m[ruleBuff.Index] = 1
 	}
 
 	return m

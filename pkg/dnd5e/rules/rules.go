@@ -15,6 +15,7 @@ type Rules struct {
 	EquipmentList
 	SpellList
 	MonsterList
+	BuffList
 }
 
 func (r Rules)String() string {

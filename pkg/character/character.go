@@ -30,7 +30,7 @@ type Character struct {
 	SpellsMemorized spells.Set
 	Slots spells.Slots
 
-	Buffs map[Buff]int
+	Buffs map[string]int
 
 	Inventory
 }
@@ -39,7 +39,7 @@ func NewCharacter() Character {
 	return Character{
 		Weapons: map[string]int{},
 		SpellsMemorized: spells.NewSet(),
-		Buffs: map[Buff]int{},
+		Buffs: map[string]int{},
 		Inventory: NewInventory(),
 	}
 }
@@ -78,23 +78,14 @@ HP: (%d/%d)
 		c.Per, AttrModifier(c.Per),
 		c.CurrHitpoints, c.MaxHitpoints)
 
-	_,desc := c.GetArmorClass()
-	s += "\nArmorClass: " + desc + "\n"
-
-	if len(c.Buffs) > 0 {
-		s += "\n--{ Buffs }--\n"
-		for name,_ := range c.Buffs {
-			s += string(name) + "\n"
-		}
+	s += "\n--{ Buffs }--\n"
+	for name,_ := range c.Buffs {
+		s += name + "\n"
+	}
+	for name,_ := range c.AutoBuffs() {
+		s += "{" + name + "}\n"
 	}
 
-	autobuffs := c.AutoBuffs()
-	if len(autobuffs) > 0 {
-		for name,_ := range autobuffs {
-			s += "(auto) " + string(name) + "\n"
-		}
-	}
-	
 	if len(c.Weapons) > 0 {
 		s += "\n--{ Weapons }--\n"
 		for name,_ := range c.Weapons {
@@ -111,6 +102,9 @@ HP: (%d/%d)
 			s += fmt.Sprintf("hit:%+d, dam:%s, hit(%s), damage(%s)\n", hitMod, damageRoll, hitModDesc, damModDesc)
 		}
 	}
+
+	_,desc := c.GetArmorClass()
+	s += "\n--{ Armor }--\n" + desc + "\n"
 
 	if c.IsSpellCaster() {
 		s += c.MagicString()
@@ -147,8 +141,8 @@ func (c *Character)Set(k,v string) string {
 	case "alignment": c.Alignment = v
 
 	case "buff":
-		if err := c.AddBuff(Buff(v)); err != nil {
-			return fmt.Sprintf("bad bugg: %v", err)
+		if err := c.AddBuff(v); err != nil {
+			return fmt.Sprintf("bad buff: %v", err)
 		}
 
 	case "weapon":

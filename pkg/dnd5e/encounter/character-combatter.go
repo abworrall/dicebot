@@ -96,7 +96,7 @@ func (cc CharacterCombatter)GetAttr(k character.AttrKind) int {
 	}
 }
 
-func (cc CharacterCombatter)HasBuff(b character.Buff) bool { return cc.Character.HasBuff(b) }
+func (cc CharacterCombatter)HasBuff(b string) bool { return cc.Character.HasBuff(b) }
 
 // WeaponDamager wraps up a weapon object (from rules) as a Damager
 type WeaponDamager struct {
