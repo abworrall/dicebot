@@ -10,18 +10,11 @@ import(
 // Lookup tables and logic for figuring out various level/class/proficiency based modifiers
 
 func AttrModifier(attrVal int) int {
-	// Kinda horrible lookup table
-	var attrModifiers = []int{
-		0,-5,-4,-4,          // attr scores 0-3
-		-3,-3,-2,-2,-1,-1,   // attr scores 4-9
-		0,0,1,1,2,2,         // attr scores 10-15
-		3,3,4,4,5,5,         // attr scores 16-21
-		6,6,7,7,8,8,9,9,10,  // attr scores 22-30
-	}
-	if attrVal<0 || attrVal>len(attrModifiers) {
-		return 0
-	}
-	return attrModifiers[attrVal]
+	if attrVal < 1 { attrVal = 1 }
+	if attrVal > 30 { attrVal = 30 }
+
+	// This table is pretty simple.
+	return attrVal/2 - 5
 }
 
 func (c *Character)ProficiencyBonus() int {
@@ -65,7 +58,10 @@ func (c *Character)GetArmorClass() (int, string) {
 		}
 		
 	} else {
-		frags = append(frags, "{no armor; AC=10}")
+		frags = append(frags, "{no armor; base AC=10}")
+		if dexBonus > 0 {
+			frags = append(frags, fmt.Sprintf("{dex bonus %+d}", dexBonus))
+		}
 	}
 
 	ac += dexBonus

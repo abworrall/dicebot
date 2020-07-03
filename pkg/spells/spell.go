@@ -23,7 +23,7 @@ func Cast(set Set, slots *Slots, name string, level int) error {
 		return fmt.Errorf("spell '%s' is not in the current spellset", name)
 	}
 
-	// Treat level 0 as default spell level
+	// Treat "cast at level 0" to mean cast at the spell's basic level
 	if level == 0 {
 		level = spell.Level
 	} else if level < spell.Level {
