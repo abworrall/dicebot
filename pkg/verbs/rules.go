@@ -3,7 +3,7 @@ package verbs
 import(
 	"fmt"
 	"strings"
-	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+	"github.com/abworrall/dicebot/pkg/rules"
 )
 
 // Rules is a stateless verb, as the API rule objects are all

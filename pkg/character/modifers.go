@@ -4,7 +4,7 @@ import(
 	"fmt"
 	"strings"
 
-	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+	"github.com/abworrall/dicebot/pkg/rules"
 )
 
 // Lookup tables and logic for figuring out various level/class/proficiency based modifiers
@@ -99,12 +99,12 @@ func (c *Character)GetWeaponDamageRoll(w rules.Item) string {
 func (c *Character)GetMagicAttackModifier() (int, string) {
 	attr := c.GetSpellcastingAbilityAttr()
 	mod := c.GetModifier(attr)
-	frags := []string{fmt.Sprintf("{spellcasting attr %s:%+d}", attr, mod)}
+	frags := []string{fmt.Sprintf("{spellcasting attr %s %+d}", attr, mod)}
 
 	// Then, proficiency bonus !
 	mod += c.ProficiencyBonus()
-	frags = append(frags, fmt.Sprintf("{proficiency: %+d}", c.ProficiencyBonus()))
-	frags = append(frags, fmt.Sprintf("{total:%+d}", mod))
+	frags = append(frags, fmt.Sprintf("{proficiency %+d}", c.ProficiencyBonus()))
+	frags = append(frags, fmt.Sprintf("{total %+d}", mod))
 
 	return mod, strings.Join(frags, " ")
 }
@@ -116,8 +116,8 @@ func (c *Character)GetWeaponAttackModifier(w rules.Item) (int, string) {
 
 	// Then, proficiency bonus !
 	mod += c.ProficiencyBonus()
-	frags = append(frags, fmt.Sprintf("{proficiency: %+d}", c.ProficiencyBonus()))
-	frags = append(frags, fmt.Sprintf("{total:%+d}", mod))
+	frags = append(frags, fmt.Sprintf("{proficiency %+d}", c.ProficiencyBonus()))
+	frags = append(frags, fmt.Sprintf("{total=%+d}", mod))
 
 	return mod, strings.Join(frags, " ")
 }
@@ -128,7 +128,9 @@ func (c *Character)GetWeaponDamageModifier(w rules.Item) (int, string) {
 	frags := []string{desc}
 
 	// No proficiency bonus for damage.
-	
+
+	frags = append(frags, fmt.Sprintf("{total=%+d}", mod))
+
 	return mod, strings.Join(frags, " ")
 }
 
@@ -143,10 +145,10 @@ func (c *Character)GetWeaponAbilityModifier(w rules.Item) (int, string) {
 
 	if w.HasProperty("Finesse") {
 		if strMod > dexMod {
-			frags = append(frags, fmt.Sprintf("{finesse; str:%+d}", strMod))
+			frags = append(frags, fmt.Sprintf("{finesse; str %+d}", strMod))
 			mod = strMod
 		} else {
-			frags = append(frags, fmt.Sprintf("{finesse; dex:%+d}", dexMod))
+			frags = append(frags, fmt.Sprintf("{finesse; dex %+d}", dexMod))
 			mod = dexMod
 		}
 
@@ -155,11 +157,11 @@ func (c *Character)GetWeaponAbilityModifier(w rules.Item) (int, string) {
 		switch w.WeaponRange {
 		case "Melee":
 			mod = strMod
-			frags = append(frags, fmt.Sprintf("{melee; str:%+d}", strMod))
+			frags = append(frags, fmt.Sprintf("{melee; str %+d}", strMod))
 
 		case "Ranged":
 			mod = dexMod
-			frags = append(frags, fmt.Sprintf("{ranged; dex:%+d}", dexMod))
+			frags = append(frags, fmt.Sprintf("{ranged; dex %+d}", dexMod))
 		}
 	}
 

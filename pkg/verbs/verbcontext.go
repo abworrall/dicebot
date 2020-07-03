@@ -8,7 +8,7 @@ import(
 
 	"github.com/abworrall/dicebot/pkg/character"
 	"github.com/abworrall/dicebot/pkg/config"
-	"github.com/abworrall/dicebot/pkg/dnd5e/encounter"
+	"github.com/abworrall/dicebot/pkg/encounter"
 	"github.com/abworrall/dicebot/pkg/state"
 )
 

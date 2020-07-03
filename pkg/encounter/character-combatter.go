@@ -4,7 +4,7 @@ import(
 	"encoding/gob"
 
 	"github.com/abworrall/dicebot/pkg/character"
-	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+	"github.com/abworrall/dicebot/pkg/rules"
 )
 
 func init() {

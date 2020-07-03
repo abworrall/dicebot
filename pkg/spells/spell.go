@@ -2,7 +2,7 @@ package spells
 
 import(
 	"fmt"
-	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+	"github.com/abworrall/dicebot/pkg/rules"
 )
 
 // We don't represent spells as such; the rules objects have all that

@@ -6,7 +6,7 @@ import(
 	"os"
 
 	"github.com/abworrall/dicebot/pkg/bot"
-	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+	"github.com/abworrall/dicebot/pkg/rules"
 	"github.com/abworrall/dicebot/pkg/verbs"
 	"github.com/abworrall/dicebot/pkg/state"
 )

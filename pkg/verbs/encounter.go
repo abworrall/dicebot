@@ -4,8 +4,8 @@ import(
 	"fmt"
 	"strconv"
 	"strings"
-	"github.com/abworrall/dicebot/pkg/dnd5e/encounter"
-	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+	"github.com/abworrall/dicebot/pkg/encounter"
+	"github.com/abworrall/dicebot/pkg/rules"
 	"github.com/abworrall/dicebot/pkg/roll"
 )
 

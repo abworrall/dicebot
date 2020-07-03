@@ -5,7 +5,7 @@ import(
 	"strconv"
 	
 	"github.com/abworrall/dicebot/pkg/character"
-	"github.com/abworrall/dicebot/pkg/dnd5e/spells"
+	"github.com/abworrall/dicebot/pkg/spells"
 )
 
 // Spells is a stateless verb, since it operates on the character

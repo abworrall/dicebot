@@ -2,7 +2,7 @@ package character
 
 import(
 	"fmt"
-	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+	"github.com/abworrall/dicebot/pkg/rules"
 )
 
 // Various class-specific guff - subtypes, class features, etc.

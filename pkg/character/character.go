@@ -2,29 +2,30 @@ package character
 
 import(
 	"fmt"
-	"strconv"
 
-	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
-	"github.com/abworrall/dicebot/pkg/dnd5e/spells"
+	"github.com/abworrall/dicebot/pkg/rules"
+	"github.com/abworrall/dicebot/pkg/spells"
 )
 
 // A Character holds info about a typical RPG character
 type Character struct {
 	Name string
-	Race string
 
+	Race string
 	Class string
 	Subclass string
 	Level int
-
 	Alignment string
+
 	Str,Int,Wis,Con,Cha,Dex,Per int
+
 	MaxHitpoints int
 	CurrHitpoints int
 
 	Weapons map[string]int
+
+	Armor string	
 	CurrWeapon string
-	Armor string
 	Shield bool
 
 	SpellsMemorized spells.Set
@@ -44,7 +45,9 @@ func NewCharacter() Character {
 	}
 }
 
-func (c Character)String() string {
+func (c *Character)IsSpellCaster() bool { return c.Slots.Max[1] > 0 }
+
+func (c *Character)String() string {
 	subclass := ""
 	if c.Subclass != "" {
 		subclass = ", " + c.Subclass
@@ -87,13 +90,15 @@ HP: (%d/%d)
 	}
 
 	if len(c.Weapons) > 0 {
-		s += "\n--{ Weapons }--\n"
+		s += "\n--{ Weapons"
+		if c.CurrWeapon != "" {
+			s += " curr=" + c.CurrWeapon
+		}
+		s += " }--\n"
 		for name,_ := range c.Weapons {
-			prefix := "   "
-			if c.CurrWeapon == name { prefix = "** " }
 			w := rules.TheRules.EquipmentList[name]
 
-			s += fmt.Sprintf("%s [%s/%s] ", prefix, name, w.WeaponCategory)
+			s += fmt.Sprintf("[%s] ", name)
 
 			hitMod,hitModDesc := c.GetWeaponAttackModifier(w)
 			damageRoll := c.GetWeaponDamageRoll(w)
@@ -113,110 +118,24 @@ HP: (%d/%d)
 	return s
 }
 
-func (c *Character)IsSpellCaster() bool { return c.Slots.Max[1] > 0 }
-
-
 func (c *Character)MagicString() string {
 	if !c.IsSpellCaster() {
 		return "You can't do magic :("
 	}
-
 	_,desc := c.GetMagicAttackModifier()
-
 	return fmt.Sprintf("\nSpell Attack Modifier: %s\n\n%s\n--- %s", desc, c.SpellsMemorized, c.Slots)
-}
-
-
-func (c *Character)Set(k,v string) string {
-	myatoi := func(s string) int {
-		i,_ := strconv.Atoi(s)
-		return i
-	}
-
-	switch k {
-	case "name": c.Name = v
-	case "race": c.Race = v
-	case "class": c.Class = v
-	case "subclass": c.Subclass = v
-	case "alignment": c.Alignment = v
-
-	case "buff":
-		if err := c.AddBuff(v); err != nil {
-			return fmt.Sprintf("bad buff: %v", err)
-		}
-
-	case "weapon":
-		if ! rules.TheRules.IsWeapon(v) {
-			return fmt.Sprintf("'%s' is not a known weapon", v)
-		}
-		c.Weapons[v] = 1
-		c.CurrWeapon = v
-
-	case "shield": c.Shield = (myatoi(v) == 1)
-		
-	case "armor":
-		if ! rules.TheRules.IsArmor(v) {
-			return fmt.Sprintf("'%s' is not a known kind of armor", v)
-		}
-		c.Armor = v
-		
-	case "str": c.Str = myatoi(v)
-	case "int": c.Int = myatoi(v)
-	case "wis": c.Wis = myatoi(v)
-	case "con": c.Con = myatoi(v)
-	case "cha": c.Cha = myatoi(v)
-	case "dex": c.Dex = myatoi(v)
-	case "per": c.Per = myatoi(v)
-
-	case "level": c.Level = myatoi(v)
-	case "maxhp": c.MaxHitpoints = myatoi(v)
-	case "hp": c.CurrHitpoints = myatoi(v)
-
-	default: return fmt.Sprintf("I don't set '%s'", k)
-	}
-
-	return fmt.Sprintf("%s set to %s", k, v)
-}
-
-// Get is a gruesome kind of thing.
-func (c *Character)Get(k string) (int,string) {
-	i := -1
-	str := ""
-
-	switch k {
-	case "name": str = c.Name
-	case "race": str = c.Race
-	case "class": str = c.Class
-	case "subclass": str = c.Subclass
-	case "alignment": str = c.Alignment
-
-	case "str": i = c.Str
-	case "int": i = c.Int
-	case "wis": i = c.Wis
-	case "con": i = c.Con
-	case "cha": i = c.Cha
-	case "dex": i = c.Dex
-	case "per": i = c.Per
-
-	case "level": i = c.Level
-	case "maxhp": i = c.MaxHitpoints
-	case "hp": i = c.CurrHitpoints
-	}
-
-	return i,str
 }
 
 // Summary returns a oneliner
 func (c *Character)Summary() string {
 	subclass := ""
-
 	if c.Subclass != "" {
-		subclass = "{"+c.Subclass+"}"
+		subclass = "{" + c.Subclass + "}"
 	}
 
 	str := fmt.Sprintf("[%s] L%d %s%s, HP:%d/%d", c.Name, c.Level, c.Class, subclass, c.CurrHitpoints, c.MaxHitpoints)
 
-	if c.Slots.Max[1] != 0 {
+	if c.IsSpellCaster() {
 		str += ", " + c.Slots.String()
 	}
 	if c.Armor != "" {
