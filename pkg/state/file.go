@@ -1,4 +1,4 @@
-package main
+package state
 
 // Crappy file-based implementation of the verb.StateManager interface.
 

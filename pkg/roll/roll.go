@@ -23,9 +23,10 @@ type Roll struct {
 	Modifier int
 
 	// These options only apply to 1d20 rolls
-	Target            int
-	WithAdvantage     bool
-	WithDisadvantage  bool
+	Target               int
+	WithAdvantage        bool
+	WithDisadvantage     bool
+	WithImprovedCritical bool  // Means you get a critical hit on 19 as well as 20
 	
 	Reason   string
 }
@@ -68,8 +69,13 @@ func (o Outcome)String() string {
 	if o.Ignored > 0 {
 		vals = append(vals, fmt.Sprintf("%d", o.Ignored))
 	}
-	
-	s := fmt.Sprintf("Roll %s: [%s]", o.Roll, strings.Join(vals,","))
+
+	diceStr := "[" + strings.Join(vals,",") + "]"
+	if o.Roll.NumDice == 1 && (o.Roll.WithAdvantage || o.Roll.WithDisadvantage) {
+		diceStr = "{" + strings.Join(vals,",") + "}"
+	}
+
+	s := fmt.Sprintf("Roll %s: %s", o.Roll, diceStr)
 	if o.Roll.Modifier != 0 {
 		s += fmt.Sprintf("%+d", o.Roll.Modifier)
 	}
@@ -86,6 +92,19 @@ func (o Outcome)String() string {
 			s += " - failed"
 		}
 	}
+
+	if o.Roll.NumDice == 1 && o.Roll.DiceSize == 20 {
+		if o.CriticalHit {
+			if o.Dice[0] == 19 {
+				s += " (IMPROVED CRITICAL HIT !!!)"
+			} else {
+				s += " (CRITICAL HIT !!!)"
+			}
+		} else if o.CriticalMiss {
+			s += " (critical miss :/ )"
+		}
+	}
+
 	return s
 }
 
@@ -123,6 +142,7 @@ func (r Roll)Do() Outcome {
 	if r.NumDice == 1 && r.DiceSize == 20 {
 		switch o.Dice[0] {
 		case  1: o.CriticalMiss = true
+		case 19: o.CriticalHit  = r.WithImprovedCritical  // 19 is a crit hit when this is set
 		case 20: o.CriticalHit  = true
 		}
 	}
@@ -133,8 +153,13 @@ func (r Roll)Do() Outcome {
 
 	o.Total += r.Modifier
 
-	if r.Target > 0 && o.Total >= r.Target {
-		o.Success = true
+	// Critical hits always succeed; critical misses always miss
+	if r.Target > 0 {
+		switch {
+		case o.CriticalHit:   o.Success = true
+		case o.CriticalMiss:  o.Success = false
+		default:              o.Success = (o.Total >= r.Target)
+		}
 	}
 	
 	return o
@@ -199,37 +224,3 @@ func Parse(s string) Roll {
 	
 	return ret
 }
-
-func AttrToModifier(attr int) int {
-	// Kinda horrible lookup table
-	var attrModifiers = []int{
-		0,-5,-4,-4,          // attr scores 0-3
-		-3,-3,-2,-2,-1,-1,   // attr scores 4-9
-		0,0,1,1,2,2,         // attr scores 10-15
-		3,3,4,4,5,5,         // attr scores 16-21
-		6,6,7,7,8,8,9,9,10,  // attr scores 22-30
-	}
-
-	if attr<0 || attr>len(attrModifiers) {
-		return 0
-	}
-	return attrModifiers[attr]
-}
-
-
-// This package implements most of the logic for the various kinds of
-// dice rolls for 5E.
-
-// roll for initiative - the 'encounter' object should pick it up, and pull in character details (or monster details)
-
-// base roll for difficulty check
-//  - takes a modifier, and a target (the DC, or AC)
-
-// player attr check
-//  - takes a target DC, a player, and an attr
-//  - figures out the modifier from the attr
-//  - does the base roll
-
-// player attack
-//  - takes a target AC, a player, and a weapon
-//  - figures out the modifier from the weapon and player's str/dex

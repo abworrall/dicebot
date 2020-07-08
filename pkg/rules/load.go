@@ -12,7 +12,9 @@ import(
 func load(datadir string) Rules {
 	return Rules{
 		EquipmentList: loadEquipment(datadir + "/" + "5e-equipment.json"),
-		SpellList: loadSpells(datadir + "/" + "5e-spells.json"),
+		SpellList:     loadSpells   (datadir + "/" + "5e-spells.json"),
+		MonsterList:   loadMonsters (datadir + "/" + "5e-monsters.json"),
+		BuffList:      loadBuffs    (datadir + "/" + "5e-features.json"),
 	}
 }
 
@@ -57,4 +59,47 @@ func loadEquipment(filename string) EquipmentList {
 	}
 	
 	return el
+}
+
+func loadMonsters(filename string) MonsterList {
+	ml := map[string]Monster{}
+
+	if jsonF,err := os.Open(filename); err == nil {
+		defer jsonF.Close()
+
+		file, _ := ioutil.ReadAll(jsonF)
+		monsters := []Monster{}
+		json.Unmarshal(file, &monsters)
+
+		for _,monster := range monsters {
+			monster.PostLoadFixups()
+			ml[monster.Index] = monster
+		}
+		log.Printf("%s, loaded %d objects\n", filename, len(ml))
+	} else {
+		log.Printf("open %s: %v\n", filename, err)
+	}
+	
+	return ml
+}
+
+func loadBuffs(filename string) BuffList {
+	bl := map[string]Buff{}
+
+	if jsonF,err := os.Open(filename); err == nil {
+		defer jsonF.Close()
+
+		file, _ := ioutil.ReadAll(jsonF)
+		buffs := []Buff{}
+		json.Unmarshal(file, &buffs)
+
+		for _,buff := range buffs {
+			bl[buff.Index] = buff
+		}
+		log.Printf("%s, loaded %d objects\n", filename, len(bl))
+	} else {
+		log.Printf("open %s: %v\n", filename, err)
+	}
+	
+	return bl
 }

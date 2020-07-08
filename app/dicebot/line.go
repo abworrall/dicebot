@@ -10,6 +10,7 @@ import(
 
 	"github.com/abworrall/dicebot/pkg/config"
 	mybot "github.com/abworrall/dicebot/pkg/bot"
+	"github.com/abworrall/dicebot/pkg/state"
 	"github.com/abworrall/dicebot/pkg/verbs"
 )
 
@@ -40,7 +41,7 @@ func registerLineHandlerFor(url string, gcpProjectId string) {
 			ctx := r.Context()
 			vc := verbs.VerbContext{
 				Ctx: ctx,
-				StateManager: NewGcpStateManager(ctx, gcpProjectId),
+				StateManager: state.NewGcpStateManager(ctx, gcpProjectId),
 			}
 			switch ev.Source.Type {
 			case linebot.EventSourceTypeUser:  vc.ExternalUserId = ev.Source.UserID

@@ -9,7 +9,7 @@ import(
 // found in the context
 type Inventory struct {}
 	
-func (i Inventory)Help() string { return "[stash foo bar] [remove N] [use N]" }
+func (i Inventory)Help() string { return "[stash FOO BAR] [remove NN] [use NN]" }
 
 func (i Inventory)Process(vc VerbContext, args []string) string {
 	c := vc.Character

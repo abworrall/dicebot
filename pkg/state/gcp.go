@@ -1,4 +1,4 @@
-package main
+package state
 
 // Crappy implementation of verb.StateManager interface, based on GCP Cloud Datastore, using the
 // skypies singleton junk. One entity per singleton.

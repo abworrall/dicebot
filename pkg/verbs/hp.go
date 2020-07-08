@@ -9,7 +9,7 @@ import(
 // state; it operates on the character's state in the context
 type HitPoints struct{}
 
-func (hp HitPoints)Help() string { return "[+n] [-n]" }
+func (hp HitPoints)Help() string { return "[+n], [-n]" }
 
 func (hp HitPoints)Process(vc VerbContext, args []string) string {
 	if vc.Character == nil { return "who are you, again ?" }

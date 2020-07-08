@@ -40,18 +40,33 @@ func TestRoll(t *testing.T) {
 		{0,  Roll{NumDice:1, DiceSize: 6},             Outcome{Dice:[]int{1},       Total: 1} },
 		{-1, Roll{NumDice:2, DiceSize: 8},             Outcome{Dice:[]int{3,2},     Total: 5} },
 		{-1, Roll{NumDice:3, DiceSize: 4, Modifier:3}, Outcome{Dice:[]int{3,4,1},   Total:11} },
-
 		{-1, Roll{NumDice:1, DiceSize:20, Target:9},   Outcome{Dice:[]int{8},       Total: 8,  Success:false} },
 		{-1, Roll{NumDice:1, DiceSize:20, Target:18},  Outcome{Dice:[]int{18},      Total:18,  Success:true} },
 
-		{1, Roll{NumDice:1, DiceSize:20, WithAdvantage:true},    Outcome{Dice:[]int{8}, Ignored:2, Total:8}},  // [2,8]
+		// with{dis}advantage means rolling 1d20 twice, and picking most{least} favorable
+		{1, Roll{NumDice:1, DiceSize:20, WithAdvantage:true},    Outcome{Dice:[]int{8}, Ignored:2,  Total:8}},  // [2,8]
 		{3, Roll{NumDice:1, DiceSize:20, WithDisadvantage:true}, Outcome{Dice:[]int{9}, Ignored:18, Total:9}}, // [9,18]
 
-		{1,
-			Roll{NumDice:1, DiceSize:20, Target:8, WithAdvantage:true}, // [1d20 >=8 WithAdvantage]
-			Outcome{Dice:[]int{8}, Ignored:2, Success:true, Total:8},   // [2,8], selected 8
+		// critical hits, misses, etc. The seeds were picked to generate the desired rolls.
+		{11,  Roll{NumDice:1, DiceSize:20, Target:1},  Outcome{Dice:[]int{1},  Total:1,  CriticalMiss:true, Success:false} },
+		{103, Roll{NumDice:1, DiceSize:20, Target:1},  Outcome{Dice:[]int{20}, Total:20, CriticalHit:true,  Success:true} },
+		{30,
+			Roll{NumDice:1, DiceSize:20, Target:100, WithImprovedCritical:true},
+			Outcome{Dice:[]int{19}, CriticalHit:true, Success:true, Total:19},
 		},
 	}
+
+	/*
+	for i:=0; i<=10000; i++ {
+		rand.Seed(int64(i))
+		r := Roll{NumDice:1, DiceSize:20}
+		o := r.Do()
+		if o.Total == 20 {
+			fmt.Printf(" %02d] %s\n", i ,o)
+		}
+    break
+	}
+  */
 
 	for i,test := range tests {
 		if test.seed >= 0 {
@@ -62,7 +77,7 @@ func TestRoll(t *testing.T) {
 		actual.Roll = Roll{} // Simplify the test comparisons
 
 		if !reflect.DeepEqual(actual, test.expected) {
-			t.Errorf("[T%d] expected %#v, got %#v", i, test.expected, actual)
+			t.Errorf("[T%d]\nwanted %#v\ngot    %#v", i, test.expected, actual)
 		}
 	}
 }

@@ -1,7 +1,6 @@
 package verbs
 
 import(
-	"context"
 	"fmt"
 	"log"
 	"reflect"
@@ -18,28 +17,25 @@ func init() {
 	HandleVerb("char",     Character{})
 	HandleVerb("inv",      Inventory{})
 	HandleVerb("spells",   Spells{})
-	HandleVerb("save",     SavingThrow{})
 	HandleVerb("roll",     Roll{})
 
-	// Rules lookup
+	// Encounter data is stored in the context
+	HandleVerb("attack",   Encounter{})
+	
+	// Verbs with their own state (not part of character objects)
 	HandleVerb("rules",    Rules{})
-
-	// Verbs with explicit state (not part of character objects)
+	HandleVerb("list",    &Lists{})
 	HandleVerb("vow",     &Vows{})
 	HandleVerb("insult",  &Insult{})
+
+	// Oddball; has its own state (list of names), but reads/writes all characters
+	HandleVerb("party",   &Party{})
 }
 
 // A Verber will respond to a bot command
 type Verber interface {
 	Process(c VerbContext, args []string) string
 	Help() string
-}
-
-// A StateManager is a thing that can load/persist a verb's state. The caller
-// should place one in the VerbContext.
-type StateManager interface {
-	ReadState(ctx context.Context, key string, ptr interface{}) error
-	WriteState(ctx context.Context, key string, ptr interface{}) error
 }
 
 // verbs is the global registry of things the bot can do

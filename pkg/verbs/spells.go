@@ -5,74 +5,86 @@ import(
 	"strconv"
 	
 	"github.com/abworrall/dicebot/pkg/character"
-	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+	"github.com/abworrall/dicebot/pkg/spells"
 )
 
 // Spells is a stateless verb, since it operates on the character
 // state found in the context
 type Spells struct {}
 
+// spells add cure-wounds        # add the spell to your working set
+// spells remove inflict-wounds  # remove the spell from your working set
+// spells cast cure-wounds [NN]  # cast the spell - optionally at a higher level
+// spells refresh                # reser your spell slots
 
-// Spellbook stuff is optional; if you leave it empty, then you know all spells.
-//   spells book add magic-missile  # add it to spellbook
-//   spells book                    # print out spellbook
-
-
-// spells set 1.2 cure-wounds     # fills up spellslot 1.2 with the cure-wounds spell
-// spells cast 1.1                # cast it !
-// spells resetall                # re-memorize all the spells
-
-func (s Spells)Help() string { return "[set 1.3 cure-wounds] [cast 1.3] [resetall]" }
+func (s Spells)Help() string { return "[add WEB], [remove WEB], [cast WEB [NN]], [refresh]" }
 
 func (s Spells)Process(vc VerbContext, args []string) string {
 	if vc.Character == nil { return "no character loaded :(" }
-	if len(args) < 1 { return vc.Character.SpellSlots.String() }
+	if len(args) < 1 {
+		return vc.Character.MagicString()
+	}
 
 	switch args[0] {
 	case "-flush":
-		vc.Character.Spellbook = character.NewSpellbook()
-		vc.Character.SpellSlots = character.NewSpellSlots()
+		vc.Character.SpellsMemorized = spells.NewSet()
+		vc.Character.Slots = spells.NewSlots()
 		return "(flushed)"
 
 	case "-init":
-		if len(args) < 4 { return "-init KIND 5 3 1" }
-		max,_ := Atois(args[2:])
-		vc.Character.Init(max, args[1])
-		return "ok"
-		
-	case "book":
-		switch len(args) {
-		case 1: return vc.Character.Spellbook.String()
-		case 3: return "book add is TBD"
-		default: return s.Help()
+		if len(args) < 4 { return "-init KIND ATTR 4 2 ..." }
+		kind := character.ParseAttr(args[2])
+		mod := vc.Character.GetModifier(kind)
+		setMax := vc.Character.Level + mod
+		vc.Character.SpellsMemorized = spells.NewSet()
+		vc.Character.SpellsMemorized.Max = setMax
+		vc.Character.SpellsMemorized.Kind = vc.Character.Class
+
+		slotMaxes,_ := Atois(args[3:])
+		vc.Character.Slots = spells.NewSlots()
+		for i,max := range slotMaxes {
+			vc.Character.Slots.Max[i+1] = max
 		}
+		vc.Character.Slots.Reset()
+		return "ok!\n" + vc.Character.MagicString()
 
-	case "set":
-		if len(args) != 3 { return s.Help() }
-
-		if err := vc.Character.SpellSlots.Memorize(&vc.Character.Spellbook, args[1], args[2]); err != nil {
-			return "you dunce - " + err.Error()
-		}
-		return "ooooh"
-
-	case "cast":
+	case "add":
 		if len(args) != 2 { return s.Help() }
-		if spell,err := vc.Character.SpellSlots.Cast(args[1]); err != nil {
-			return err.Error()
-		} else if spell == "" {
-			return "*fizzle*"
-		} else {
-			vc.LogEvent("cast " + spell)
+		if err := vc.Character.SpellsMemorized.Add(args[1]); err != nil {
+			return fmt.Sprintf("add failed: %v", err)
+		}
+		return "oooh !!"
 
-			str := fmt.Sprintf("%s casts '%s'", vc.User, spell)
-			if s := rules.TheRules.SpellList.LookupFirst(spell); s != nil {
-				str += "\n\n" + s.Description()
+	case "remove":
+		if len(args) != 2 { return s.Help() }
+		vc.Character.SpellsMemorized.Remove(args[1])
+		return "it's probably gone"
+		
+	case "cast":
+		if len(args) < 2 { return s.Help() }
+		level, name := 0, args[1]
+		if len(args) == 3 {
+			if v,err := strconv.Atoi(args[2]); err != nil {
+				return s.Help() + " " + err.Error()
+			} else {
+				level = v
 			}
+		}
+		if err := spells.Cast(vc.Character.SpellsMemorized, &vc.Character.Slots, name, level); err != nil {
+			return fmt.Sprintf("could not cast '%s': %v", name, err)
+		} else {
+			sp := spells.Lookup(name)
+
+			str := fmt.Sprintf("%s casts '%s'", vc.User, name)
+			if level > sp.Level {
+				str += fmt.Sprintf(" at level %d!", level)
+			}
+			str += "\n\n" + sp.Description()
 			return str
 		}
 
-	case "rememorize":
-		vc.Character.SpellSlots.Refresh()
+	case "refresh":
+		vc.Character.Slots.Reset()
 		vc.LogEvent("refreshed their spell slots")
 		return "aah, that's better"
 		

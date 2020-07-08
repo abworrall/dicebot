@@ -3,13 +3,14 @@ package verbs
 import(
 	"fmt"
 	"strings"
-	"github.com/abworrall/dicebot/pkg/dnd5e/rules"
+	"github.com/abworrall/dicebot/pkg/rules"
 )
 
-// Rules is stateless, as the API rule objects are all magically loaded into a global var. For now.
+// Rules is a stateless verb, as the API rule objects are all
+// magically loaded into a global var. For now.
 type Rules struct{}
 
-func (r Rules)Help() string { return "[spell burning-hands] [equip sword]" }
+func (r Rules)Help() string { return "[spell WEB] [equip NET] [monster BAT] [buff RAGE]" }
 
 func (r Rules)Process(vc VerbContext, args []string) string {
 	if len(args) < 2 { return r.Help() }
@@ -17,8 +18,10 @@ func (r Rules)Process(vc VerbContext, args []string) string {
 	term := strings.Join(args[1:], " ")
 	
 	switch args[0] {
-	case "spell": return r.Lookup(term, rules.TheRules.SpellList)
-	case "equip": return r.Lookup(term, rules.TheRules.EquipmentList)
+	case "spell":   return r.Lookup(term, rules.TheRules.SpellList)
+	case "equip":   return r.Lookup(term, rules.TheRules.EquipmentList)
+	case "monster": return r.Lookup(term, rules.TheRules.MonsterList)
+	case "buff":    return r.Lookup(term, rules.TheRules.BuffList)
 
 /*
 	case "list":

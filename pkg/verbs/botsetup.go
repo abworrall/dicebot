@@ -11,7 +11,7 @@ type BotSetup struct {
 }
 
 func (bs *BotSetup)Help() string {
-	return "claim NAME"
+	return "claim USER"
 }
 
 func (bs *BotSetup)MaybeInit() {
@@ -60,5 +60,5 @@ func (bs *BotSetup)ClaimDelete(name string) string {
 }
 
 func (bs *BotSetup)Debug(vc VerbContext) string {
-	return fmt.Sprintf("vc: %#v\n\nc: %#v\n\nsetup: %#v", vc, vc.Character, bs)
+	return fmt.Sprintf("vc: %#v\n\nc: %#v\n\nencounter: %#v\n\nsetup: %#v", vc, vc.Character, vc.Encounter, bs)
 }
