@@ -82,6 +82,12 @@ func (c *Character)GetWeaponDamageRoll(w rules.Item) string {
 	mod,_ := c.GetWeaponDamageModifier(w)
 	bonus += mod
 
+	// The fighters Dueling buff gives a +2 damage bonus
+	if c.HasBuff(BuffFighterFightingStyleDueling) {
+		//TODO: but only when only one weapon weilded - need to update character to have two current weapons
+		bonus += 2
+	}
+
 	if bonus != 0 {
 		str += fmt.Sprintf("%+d", bonus)
 	}
