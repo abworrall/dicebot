@@ -124,8 +124,8 @@ func (c *Character)GetWeaponDamageModifier(w rules.Item) (int, string) {
 	frags := []string{desc}
 
 	// The fighters Dueling buff gives a +2 damage bonus
-	if c.HasBuff(BuffFighterFightingStyleDueling) {
-		//TODO: but only when only one weapon wielded - need to update character to have two current weapons
+	if c.HasBuff(BuffFighterFightingStyleDueling) && w.WeaponRange == "Melee" {
+		// TODO: but only when only one weapon wielded - need to update character to have two current weapons
 		frags = append(frags, fmt.Sprintf("{%s %+d}", BuffFighterFightingStyleDueling, 2))
 		mod += 2
 	}
