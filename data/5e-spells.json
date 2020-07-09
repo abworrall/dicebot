@@ -12475,5 +12475,38 @@
       }
     ],
     "url": "/api/spells/zone-of-truth"
+  },
+  {
+    "index": "conjure-cake",
+    "name": "Conjure Cake",
+    "desc": [
+      "A cake is created. The spellcaster must have memorized the recipe for the cake in advance. The cake will be avoided by undead or constructs."
+    ],
+    "higher_level": [
+      "When you cast this spell using a spell slot of 2nd level or higher, multiple cakes are created."
+    ],
+    "range": "Touch",
+    "components": ["V", "S"],
+    "ritual": false,
+    "duration": "Instantaneous",
+    "concentration": false,
+    "casting_time": "1 action",
+    "level": 1,
+    "school": {
+      "name": "Evocation",
+      "url": "/api/magic-schools/evocation"
+    },
+    "classes": [
+      {
+        "name": "Cleric",
+        "url": "/api/classes/cleric"
+      }
+    ],
+    "subclasses": [
+      {
+        "name": "Life",
+        "url": "/api/subclasses/life"
+      }
+    ]
   }
 ]

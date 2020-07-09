@@ -12,7 +12,7 @@ import(
 type Character struct{}
 
 func (c Character)Help() string {
-	return "[set FIELD VALUE], [list]"
+	return "[set FIELD VALUE], [list],then you can  [remove FIELD VALUE]"
 }
 
 func (c Character)Process(vc VerbContext, args []string) string {
@@ -28,6 +28,10 @@ func (c Character)Process(vc VerbContext, args []string) string {
 	case "set":
 		if len(args) != 3 { return "`set field value`, plz" }
 		return c.Set(vc, args[1], args[2])
+
+	case "remove":
+		if len(args) != 3 { return "`remove field entry`, plz" }
+		return c.Remove(vc, args[1], args[2])
 
 	case "list":
 		return "[Useful fields: weapon, armor, shield]\n"+
@@ -98,4 +102,17 @@ func (c Character)Set(vc VerbContext, k,v string) string {
 	}
 
 	return fmt.Sprintf("%s set to %s", k, v)
+}
+
+func (c Character)Remove(vc VerbContext, k,v string) string {
+
+	switch k {
+	case "buff":
+		if err := vc.Character.RemoveBuff(v); err != nil {
+			return fmt.Sprintf("bad buff: %v", err)
+		}
+	default: return fmt.Sprintf("I don't remove '%s'", k)
+	}
+
+	return fmt.Sprintf("%s has %s removed", k, v)
 }

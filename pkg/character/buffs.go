@@ -23,6 +23,17 @@ func (c *Character)AddBuff(b string) error {
 	return nil
 }
 
+
+func (c *Character)RemoveBuff(b string) error {
+	if _,exists := c.Buffs[b]; !exists {
+		return fmt.Errorf("You don't have buff '%s'", b)
+	}
+
+	delete(c.Buffs, b)
+
+	return nil
+}
+
 func (c *Character)HasBuff(b string) bool {
 	autobuffs := c.AutoBuffs()
 

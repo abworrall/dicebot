@@ -23,7 +23,7 @@ func (s Set)String() string {
 
 	str := fmt.Sprintf("-- Spellset (max:%d, kind:%s)\n", s.Max, s.Kind)
 	for name,_ := range s.Spells {
-		str += fmt.Sprintf(" %s\n", Lookup(name).Summary())
+		str += " " + Lookup(name).ShorterSummary()
 	}
 	return str
 }

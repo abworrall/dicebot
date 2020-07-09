@@ -45,8 +45,6 @@ func NewCharacter() Character {
 	}
 }
 
-func (c *Character)IsSpellCaster() bool { return c.Slots.Max[1] > 0 }
-
 func (c *Character)String() string {
 	subclass := ""
 	if c.Subclass != "" {
@@ -116,14 +114,6 @@ HP: (%d/%d)
 	}
 
 	return s
-}
-
-func (c *Character)MagicString() string {
-	if !c.IsSpellCaster() {
-		return "You can't do magic :("
-	}
-	_,desc := c.GetMagicAttackModifier()
-	return fmt.Sprintf("\nSpell Attack Modifier: %s\n\n%s\n--- %s", desc, c.SpellsMemorized, c.Slots)
 }
 
 // Summary returns a oneliner
