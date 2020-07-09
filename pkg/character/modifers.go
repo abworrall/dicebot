@@ -82,12 +82,6 @@ func (c *Character)GetWeaponDamageRoll(w rules.Item) string {
 	mod,_ := c.GetWeaponDamageModifier(w)
 	bonus += mod
 
-	// The fighters Dueling buff gives a +2 damage bonus
-	if c.HasBuff(BuffFighterFightingStyleDueling) {
-		//TODO: but only when only one weapon weilded - need to update character to have two current weapons
-		bonus += 2
-	}
-
 	if bonus != 0 {
 		str += fmt.Sprintf("%+d", bonus)
 	}
@@ -129,10 +123,17 @@ func (c *Character)GetWeaponDamageModifier(w rules.Item) (int, string) {
 	mod, desc := c.GetWeaponAbilityModifier(w)
 	frags := []string{desc}
 
+	// The fighters Dueling buff gives a +2 damage bonus
+	if c.HasBuff(BuffFighterFightingStyleDueling) {
+		//TODO: but only when only one weapon wielded - need to update character to have two current weapons
+		frags = append(frags, fmt.Sprintf("{%s %+d}", BuffFighterFightingStyleDueling, 2))
+		mod += 2
+	}
+	
 	// No proficiency bonus for damage.
 
 	frags = append(frags, fmt.Sprintf("{total=%+d}", mod))
-
+	
 	return mod, strings.Join(frags, " ")
 }
 
