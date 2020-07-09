@@ -11,6 +11,7 @@ const(
 	// This list is for buffs that we make use of elsewhere in the bot 
 	BuffFighterChampionImprovedCritical = "improved-critical"
 	BuffFighterFightingStyleDefense = "fighter-fighting-style-defense"
+	BuffFighterFightingStyleDueling = "fighter-fighting-style-dueling"
 )
 
 func (c *Character)AddBuff(b string) error {
