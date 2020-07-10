@@ -19,7 +19,8 @@ type Combatter interface {
 
 	HasBuff(string) bool
 
-	TakeDamage(d int)
+	AdjustHP(mod int)
+	AdjustAC(mod int)
 }
 
 // Damager is something that can be used to make an attack, via a roll

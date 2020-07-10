@@ -60,51 +60,68 @@ func (e *Encounter)Lookup(name string) (Combatter, bool) {
 	return c,exists
 }
 
-func (e *Encounter)Attack(c1,c2 Combatter, weaponOrAction string) string {
-	str := fmt.Sprintf("%s attacks %s with %s: ", c1.GetName(), c2.GetName(), weaponOrAction)
+type AttackSpec struct {
+	Targets []Combatter
 
-	weapon := c1.GetDamager(weaponOrAction)
+	// For a fully auto attack using the combatter's damager
+	Attacker Combatter
+	DamagerName string
+	WithAdvantage bool
+	WithDisadvantage bool
+}
+func NewAttackSpec() AttackSpec {
+	return AttackSpec{Targets: []Combatter{}}
+}
+
+func (e *Encounter)Attack(spec AttackSpec) string {	//c1,c2 Combatter, weaponOrAction string) string {
+	str := ""
+
+	c1 := spec.Attacker
+	weapon := c1.GetDamager(spec.DamagerName)
 	if weapon == nil || weapon.GetName() == "" {
-		return fmt.Sprintf("%s did not have a '%s'", c1.GetName(), weaponOrAction)
+		return fmt.Sprintf("%s did not have a '%s'", c1.GetName(), spec.DamagerName)
 	}
 
-	// TODO: we need some extra context info at this point.
-	//  1. Is there adv/disadv ?
+	for _,c2 := range spec.Targets {
+		str += fmt.Sprintf("%s attacks %s with %s: ", c1.GetName(), c2.GetName(), weapon.GetName())
 
-	// Build the hit roll
-	hitRoll := roll.Roll{
-		NumDice: 1,
-		DiceSize: 20,
-		Modifier: weapon.GetHitModifier(),
-		Target: c2.GetArmorClass(),
+		// Build the hit roll
+		hitRoll := roll.Roll{
+			NumDice: 1,
+			DiceSize: 20,
+			Modifier: weapon.GetHitModifier(),
+			Target: c2.GetArmorClass(),
+			WithAdvantage: spec.WithAdvantage,
+			WithDisadvantage: spec.WithDisadvantage,
+			WithImprovedCritical: c1.HasBuff(character.BuffFighterChampionImprovedCritical),
+		}
 
-		WithImprovedCritical: c1.HasBuff(character.BuffFighterChampionImprovedCritical),
-	}
+		hitOutcome := hitRoll.Do()
+		str += "Attack - " + hitOutcome.String()
 
-	hitOutcome := hitRoll.Do()
-	str += "Attack - " + hitOutcome.String()
+		if hitOutcome.Success {
+			// We hit ! Damage roll ?
+			if weapon.GetDamageRoll() != "" {
+				damageRoll := roll.Parse(weapon.GetDamageRoll())
 
-	if hitOutcome.Success {
-		// We hit ! Damage roll ?
-		if weapon.GetDamageRoll() != "" {
-			damageRoll := roll.Parse(weapon.GetDamageRoll())
+				if hitOutcome.CriticalHit {
+					// Twice as many damage dice !
+					str += " DOUBLE DICE"
+					damageRoll.NumDice *= 2
+				}
 
-			if hitOutcome.CriticalHit {
-				// Twice as many damage dice !
-				str += " DOUBLE DICE"
-				damageRoll.NumDice *= 2
-			}
+				damageOutcome := damageRoll.Do()
+				str += " Damage - " + damageOutcome.String()
 
-			damageOutcome := damageRoll.Do()
-			str += " Damage - " + damageOutcome.String()
+				c2.AdjustHP(-1 * damageOutcome.Total)
 
-			c2.TakeDamage(damageOutcome.Total)
-
-			hp,_ := c2.GetHP()
-			if hp == 0 {
-				str += " they are DEAD"
+				hp,_ := c2.GetHP()
+				if hp == 0 {
+					str += " they are DEAD"
+				}
 			}
 		}
+		str += "\n"
 	}
 
 	return str

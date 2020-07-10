@@ -24,7 +24,10 @@ type MonsterCombatter struct {
 
 func NewCombatterFromMonster(m rules.Monster, i int) Combatter {
 	mc := MonsterCombatter{
-		Counts: map[string]int{"hp": m.HitPoints},
+		Counts: map[string]int{
+			"hp": m.HitPoints,
+			"ac": m.ArmorClass,
+		},
 		SpecificName: fmt.Sprintf("%s.%d", m.Index, i),
 		Monster: m,
 	}
@@ -32,17 +35,20 @@ func NewCombatterFromMonster(m rules.Monster, i int) Combatter {
 	return mc
 }
 
-func (mc MonsterCombatter)TakeDamage(d int) {
-	mc.Counts["hp"] -= d
+func (mc MonsterCombatter)AdjustAC(mod int) {
+	mc.Counts["ac"] += mod
+}
+func (mc MonsterCombatter)AdjustHP(mod int) {
+	mc.Counts["hp"] += mod
 	if mc.Counts["hp"] < 0 {
 		mc.Counts["hp"] = 0
 	}
-
 }
+func (mc MonsterCombatter)TakeDamage(d int) { mc.AdjustHP(d * -1) }
 
 func (mc MonsterCombatter)GetName() string { return mc.SpecificName }
 func (mc MonsterCombatter)GetGroup() string { return mc.Index }
-func (mc MonsterCombatter)GetArmorClass() int { return mc.Monster.ArmorClass }
+func (mc MonsterCombatter)GetArmorClass() int { return mc.Counts["ac"] }
 func (mc MonsterCombatter)GetHP() (int, int) { return mc.Counts["hp"], mc.Monster.HitPoints }
 
 func (mc MonsterCombatter)GetAttr(k character.AttrKind) int {
@@ -87,14 +93,8 @@ type ActionDamager struct {
 	Action rules.ActionStruct
 }
 
-func (ad ActionDamager)	GetName() string {
-	return ad.Action.Index
-}
-
-func (ad ActionDamager)	GetHitModifier() int {
-	return ad.Action.AttackBonus
-}
-
+func (ad ActionDamager)	GetName() string { return ad.Action.Index }
+func (ad ActionDamager)	GetHitModifier() int { return ad.Action.AttackBonus }
 func (ad ActionDamager)	GetDamageRoll() string {
 	str := ad.Action.Damage[ad.DamageIndex].DamageDice
 	if ad.Action.Damage[ad.DamageIndex].DamageBonus != 0 {

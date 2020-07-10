@@ -32,10 +32,18 @@ type Encounter struct{}
 //   attack TARGET hp -17
 //   attack TARGET1,TARGET2,... do 4d6+4
 
+//   attack TARGET by PLAYER    // one player playing another as an NPC
+
+
+// On the fly adjustments
+//   attack TARGET tweak FIELD VALUE
+//   attack TARGET tweak ac +2
+//   attack TARGET tweak hp -7
+
 // How players get attacked:
 //   attack TARGET by MONSTER [with ACTION]
 
-func (e Encounter)Help() string { return "[join], [TARGET [with WEAPON][do DAMAGEROLL][hp +-NN]" }
+func (e Encounter)Help() string { return "[join], [TARGET [with WEAPON][with advantage][do DAMAGEROLL][by PLAYER][tweak {hp,ac} NN]" }
 
 func (e Encounter)Process(vc VerbContext, args []string) string {
 	if len(args) < 1 { return vc.Encounter.String() }
@@ -52,11 +60,11 @@ func (e Encounter)Process(vc VerbContext, args []string) string {
 	}
 
 	// Else, assume it's an attack spec
-	attackSpec, err := ParseAttackArgs(vc, args)
+	attack, err := ParseAttackArgs(vc, args)
 	if err != nil {
 		return fmt.Sprintf("Problems: %v", err)
 	}
-	return e.AttackTarget(vc, attackSpec)
+	return e.AttackTargets(vc, attack)
 }
 
 // AddPlayer adds a PC to the encounter. Subsequent calls on the same
@@ -125,22 +133,21 @@ func (e Encounter)AddMonster(vc VerbContext, nameStr string) string {
 	return str
 }
 
-type AttackSpec struct {
-	Targets []encounter.Combatter
-	Attacker encounter.Combatter
-	Weapon string
-	DamageRoll string
-	DamageAmount int
+type Attack struct {
+	encounter.AttackSpec   // Build up the attack spec ...
+
+	TweakHPAmount  int     // ... or tweak a value in the target ...
+	TweakACAmount  int
+	DamageRoll     string  // ... or jump straight to a damage roll ...
 }
 
-// db attack TARGET [with WEAPON] [do DAMAGEROLL] [by MONSTER] [hp +-NN]
-// TODO: withadvantage, for attack rolls
-func ParseAttackArgs(vc VerbContext, args []string) (AttackSpec, error) {
+// db attack TARGET [with WEAPON] [with [dis]advantage] [do DAMAGEROLL] [by MONSTER] [hp +-NN]
+func ParseAttackArgs(vc VerbContext, args []string) (Attack, error) {
 	if len(args) == 0 {
-		return AttackSpec{}, fmt.Errorf("not enough args at all")
+		return Attack{}, fmt.Errorf("not enough args at all")
 	}
 
-	spec := AttackSpec{Targets: []encounter.Combatter{}}
+	attack := Attack{AttackSpec: encounter.NewAttackSpec()}
 	targets := ""
 	attacker := vc.Character.Name
 	
@@ -148,59 +155,93 @@ func ParseAttackArgs(vc VerbContext, args []string) (AttackSpec, error) {
 
 	for len(args) >= 2 {
 		switch args[0] {
-		case "do":   spec.DamageRoll = args[1]
-		case "with": spec.Weapon = args[1]
 		case "by":   attacker = args[1]
-		case "hp":
-			amount,_ := strconv.Atoi(args[1])
-			spec.DamageAmount = amount
+		case "do":   attack.DamageRoll = args[1]
+
+		case "with":
+			switch args[1] {
+			case "advantage": attack.AttackSpec.WithAdvantage = true
+			case "disadvantage": attack.AttackSpec.WithDisadvantage = true
+			default: attack.AttackSpec.DamagerName = args[1]
+			}
+
+		case "tweak": // tweak hp -4
+			if len(args) != 3 { return Attack{}, fmt.Errorf("not enough args for tweak") }
+			mod,_ := strconv.Atoi(args[2])
+			switch args[1] {
+			case "hp": attack.TweakHPAmount = mod
+			case "ac": attack.TweakACAmount = mod
+			default: 
+				return Attack{}, fmt.Errorf("you can't tweak '%s'", args[1])
+			}
+			// Hacky way to keep arg eating in sync since this is a three-arg eat
+			args = args[1:]
 		}
-		args = args[2:]
+		args = args[2:] // eat the two args we just processed, keep looping
 	}
 
 	if c,exists := vc.Encounter.Lookup(attacker); ! exists {
-		return AttackSpec{}, fmt.Errorf("attacker combatant '%s' not found", attacker)
+		return Attack{}, fmt.Errorf("attacker combatant '%s' not found", attacker)
 	} else {
-		spec.Attacker = c
+		attack.AttackSpec.Attacker = c
 	}	
 
 	for _,target := range strings.Split(targets, ",") {
 		if c,exists := vc.Encounter.Lookup(target); ! exists {
-			return AttackSpec{}, fmt.Errorf("target combatant '%s' not found", target)
+			return Attack{}, fmt.Errorf("target combatant '%s' not found", target)
 		} else {
-			spec.Targets = append(spec.Targets, c)
+			attack.AttackSpec.Targets = append(attack.AttackSpec.Targets, c)
 		}
 	}
 
-	return spec, nil
+	return attack, nil
 }
 
-func (e Encounter)AttackTarget(vc VerbContext, spec AttackSpec) string {
-	if hp,_ := spec.Attacker.GetHP(); hp <= 0 {
-		return fmt.Sprintf("%s is dead ! such cheating", spec.Attacker.GetName())
+/*
+type Attack struct {
+	encounter.AttackSpec   // Build up the attack spec ...
+
+	TweakHPAmount  int     // ... or tweak a value in the target ...
+	TweakACAmount  int
+	DamageRoll     string  // ... or jump straight to a damage roll ...
+}
+*/
+
+func (e Encounter)AttackTargets(vc VerbContext, attack Attack) string {
+	attacker := attack.AttackSpec.Attacker
+	if hp,_ := attacker.GetHP(); hp <= 0 {
+		return fmt.Sprintf("%s is dead ! such cheating", attacker.GetName())
 	}
 
-	// If there is explicit damage, just apply it
-	if spec.DamageAmount != 0 {
+	// If there is a tweak, just do it
+	if attack.TweakHPAmount != 0 {
 		str := ""
-		for _,target := range spec.Targets {
-			target.TakeDamage(spec.DamageAmount)
-			str += fmt.Sprintf("%s damaged %s: %+d", spec.Attacker.GetName(), target.GetName(), spec.DamageAmount)
+		for _,target := range attack.AttackSpec.Targets {
+			target.AdjustHP(attack.TweakHPAmount)
+			str += fmt.Sprintf("%s adjusted HP on %s: %+d", attacker.GetName(), target.GetName(), attack.TweakHPAmount)
 			if hp,_ := target.GetHP(); hp <= 0 {
-				str += " - they are DEAD"
+				str += " - target is DEAD"
 			}
 			str += "\n"
+		}
+		return str
+	}
+	if attack.TweakACAmount != 0 {
+		str := ""
+		for _,target := range attack.AttackSpec.Targets {
+			target.AdjustAC(attack.TweakACAmount)
+			str += fmt.Sprintf("%s adjusted AC on %s: %+d\n", attacker.GetName(), target.GetName(), attack.TweakACAmount)
 		}
 		return str
 	}
 
 	// If there is an explicit damage roll, just do it
-	if spec.DamageRoll != "" {
+	if attack.DamageRoll != "" {
 		str := ""
-		for _,target := range spec.Targets {
-			outcome := roll.New(spec.DamageRoll)
-			target.TakeDamage(outcome.Total)
-			str += fmt.Sprintf("%s damaged %s: %s", spec.Attacker.GetName(), target.GetName(), outcome)
+		for _,target := range attack.AttackSpec.Targets {
+			outcome := roll.New(attack.DamageRoll)
+			target.AdjustHP(-1 * outcome.Total)
+			str += fmt.Sprintf("%s damaged %s: %s", attacker.GetName(), target.GetName(), outcome)
 			if hp,_ := target.GetHP(); hp <= 0 {
 				str += " - they are DEAD"
 			}
@@ -209,10 +250,7 @@ func (e Encounter)AttackTarget(vc VerbContext, spec AttackSpec) string {
 		return str
 	}
 
-	if len(spec.Targets) != 1 {
-		return "You can only attack one target with your weapon"
-	}
-	str := vc.Encounter.Attack(spec.Attacker, spec.Targets[0], spec.Weapon) + "\n"
+	str := vc.Encounter.Attack(attack.AttackSpec) + "\n"
 
 	return str
 }

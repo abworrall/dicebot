@@ -19,8 +19,13 @@ type CharacterCombatter struct {
 // NewCombatterFromMonster takes a monster definition, clones it all,
 // and wraps it up so it can act as a Comatter instance in an encounter
 func NewCombatterFromCharacter(c character.Character) Combatter {
+	ac,_ := c.GetArmorClass()
+
 	cc := CharacterCombatter{
-		Counts: map[string]int{"hp": c.CurrHitpoints},
+		Counts: map[string]int{
+			"hp": c.CurrHitpoints,
+			"ac": ac,
+		},
 		Character: c,
 	}
 
@@ -30,18 +35,19 @@ func NewCombatterFromCharacter(c character.Character) Combatter {
 func (cc CharacterCombatter)GetName() string { return cc.Name }
 func (cc CharacterCombatter)GetGroup() string { return cc.Name }
 func (cc CharacterCombatter)GetHP() (int, int) { return cc.Counts["hp"], cc.Character.MaxHitpoints }
+func (cc CharacterCombatter)GetArmorClass() int { return cc.Counts["ac"] }
 
-func (cc CharacterCombatter)TakeDamage(d int) {
-	cc.Counts["hp"] -= d
+func (cc CharacterCombatter)AdjustAC(mod int) {
+	cc.Counts["ac"] += mod
+}
+
+func (cc CharacterCombatter)AdjustHP(mod int) {
+	cc.Counts["hp"] -= mod
 	if cc.Counts["hp"] < 0 {
 		cc.Counts["hp"] = 0
 	}
 }
-
-func (cc CharacterCombatter)GetArmorClass() int {
-	ac,_ := cc.Character.GetArmorClass()
-	return ac
-}
+func (cc CharacterCombatter)TakeDamage(d int) { cc.AdjustHP(d * -1) }
 
 func (cc CharacterCombatter)GetDamagerNames() []string {
 	ret := []string{}
@@ -82,7 +88,6 @@ func (cc CharacterCombatter)GetDamager(name string) Damager {
 	}
 }
 
-
 func (cc CharacterCombatter)GetAttr(k character.AttrKind) int {
 	switch k {
 	case character.Str: return cc.Str
@@ -111,7 +116,7 @@ func (wd WeaponDamager)	GetHitModifier() int {
 }
 
 // MagicDamager is a shim to represent a magic attack; it has no
-// damage, since that's all handed separately.
+// damage, since that's all worked out manually
 type MagicDamager struct {
 	character.Character
 }
