@@ -27,20 +27,24 @@ func (c *Character)MagicString() string {
 		return "You can't do magic :("
 	}
 	_,desc := c.GetMagicAttackModifier()
-	_,autoStr := c.SpellsAlwaysMemorized()
 
-	return fmt.Sprintf("\nSpell Attack Modifier: %s\n\n%s%s\n--- %s", desc, c.SpellsMemorized, autoStr, c.Slots)
+	return fmt.Sprintf("\nSpell Attack Modifier: %s\n\n%s\n--- %s", desc, c.GetCastableSpells(), c.Slots)
 }
 
-// SpellsAlwaysMemorized lists whatever spells the character can always cast
-func (c *Character)SpellsAlwaysMemorized() (spells.Set, string) {
+// SpellsAlwaysMemorized lists whatever spells the character has hardwired for whatever reason
+func (c *Character)SpellsAlwaysMemorized() spells.Set {
 	s := spells.NewSet()
-	str := ""
-	
-	for _,spell := range rules.TheRules.SpellList.FindMatching(c.Class, c.Subclass, c.MaxSpellLevel()) {
-		s.Add(spell.Index)
-		str += fmt.Sprintf(" L%d {%s} cast:{%s}\n", spell.Level, spell.Index, spell.CastingTime)
+
+	if c.HasBuff(BuffClericDivineDomainSpells) {
+		for _,spell := range rules.TheRules.SpellList.FindMatching(c.Class, c.Subclass, c.MaxSpellLevel()) {
+			s.Add(spell.Index)
+		}
 	}
-	
-	return s, str
+
+	return s
+}
+
+// GetSpellsMemorized returns a set of all the spells that can be cast right now
+func (c *Character)GetCastableSpells() spells.Set {
+	return c.SpellsMemorized.UnionWith(c.SpellsAlwaysMemorized(), 2)
 }

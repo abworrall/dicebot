@@ -46,7 +46,7 @@ func (s Spells)Process(vc VerbContext, args []string) string {
 			vc.Character.Slots.Max[i+1] = max
 		}
 		vc.Character.Slots.Reset()
-		return "ok!\n" + vc.Character.MagicString()
+		return "ok!?\n" + vc.Character.MagicString()
 
 	case "add":
 		if len(args) != 2 { return s.Help() }
@@ -70,7 +70,7 @@ func (s Spells)Process(vc VerbContext, args []string) string {
 				level = v
 			}
 		}
-		if err := spells.Cast(vc.Character.SpellsMemorized, &vc.Character.Slots, name, level); err != nil {
+		if err := spells.Cast(vc.Character.GetCastableSpells(), &vc.Character.Slots, name, level); err != nil {
 			return fmt.Sprintf("could not cast '%s': %v", name, err)
 		} else {
 			sp := spells.Lookup(name)

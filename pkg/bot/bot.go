@@ -28,6 +28,7 @@ func New(name string, nicknames ...string) Bot {
 func (b Bot)ProcessLine(vc verbs.VerbContext, in string) string {
 	w := sanitizeLine(in)
 
+	if len(w) == 0 { return "" }
 	if _,exists := b.nicknames[w[0]]; !exists { return "" }
 	if len(w) < 2 { return "Yo" }
 

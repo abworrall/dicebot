@@ -8,7 +8,9 @@ import(
 // Various class-specific guff - subtypes, class features, etc.
 
 const(
-	// This list is for buffs that we make use of elsewhere in the bot 
+	// This list is for buffs that we make use of elsewhere in the bot; keys match the JSON objects
+	BuffClericDivineDomainSpells = "domain-spells-1"
+
 	BuffFighterChampionImprovedCritical = "improved-critical"
 	BuffFighterFightingStyleDefense = "fighter-fighting-style-defense"
 	BuffFighterFightingStyleDueling = "fighter-fighting-style-dueling"

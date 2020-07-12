@@ -37,7 +37,7 @@ func (s Spell)ShorterSummary() string {
 	if s.Ritual {
 		cast = "ritual, " + cast
 	}
-	return fmt.Sprintf(" L%d %s cast:{%s}\n", s.Level, s.Index, cast)
+	return fmt.Sprintf("L%d %s cast:{%s}", s.Level, s.Index, cast)
 }
 
 func (s Spell)Description() string {
