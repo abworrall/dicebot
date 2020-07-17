@@ -41,6 +41,8 @@ func (c *Character)SpellsAlwaysMemorized() spells.Set {
 		}
 	}
 
+	s.Add("conjure-cake")
+
 	return s
 }
 

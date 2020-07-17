@@ -12480,10 +12480,12 @@
     "index": "conjure-cake",
     "name": "Conjure Cake",
     "desc": [
-      "A cake is created. The spellcaster must have memorized the recipe for the cake in advance. The cake will be avoided by undead or constructs."
+        "A cake is created.",
+        "The spellcaster must have memorized the particular cake recipe in advance, after a long rest - this defines their set of 'prepared cake recipes'.",
+        "At bakeoff time, the spellcaster can bake cakes using *any* of their 'prepared recipes', until they run out of baking slots."
     ],
     "higher_level": [
-      "When you cast this spell using a spell slot of 2nd level or higher, multiple cakes are created."
+      "When you cast this spell using a spell slot of 2nd level or higher, one cake is created per level."
     ],
     "range": "Touch",
     "components": ["V", "S"],
@@ -12498,15 +12500,13 @@
     },
     "classes": [
       {
-        "name": "Cleric",
-        "url": "/api/classes/cleric"
+        "name": "Cleric"
+      },
+      {
+        "name": "Wizard"
       }
     ],
     "subclasses": [
-      {
-        "name": "Life",
-        "url": "/api/subclasses/life"
-      }
     ]
   }
 ]

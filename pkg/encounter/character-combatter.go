@@ -42,7 +42,7 @@ func (cc CharacterCombatter)AdjustAC(mod int) {
 }
 
 func (cc CharacterCombatter)AdjustHP(mod int) {
-	cc.Counts["hp"] -= mod
+	cc.Counts["hp"] += mod
 	if cc.Counts["hp"] < 0 {
 		cc.Counts["hp"] = 0
 	}

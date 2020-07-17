@@ -29,7 +29,7 @@ func (s Spell)String() string { return s.Summary() }
 func (s Spell)Type() string { return "spell" }
 
 func (s Spell)Summary() string {
-	return fmt.Sprintf("[L%d (%s/%s), %s, cast:{%s}]", s.Level, s.ClassesString(), s.SubclassesString(), s.Index, s.CastingTime)
+	return fmt.Sprintf("[L%d (%s/%s), %s {%s}]", s.Level, s.ClassesString(), s.SubclassesString(), s.Index, s.CastingTime)
 }
 
 func (s Spell)ShorterSummary() string {
@@ -37,7 +37,7 @@ func (s Spell)ShorterSummary() string {
 	if s.Ritual {
 		cast = "ritual, " + cast
 	}
-	return fmt.Sprintf("L%d %s cast:{%s}", s.Level, s.Index, cast)
+	return fmt.Sprintf("L%d %s {%s}", s.Level, s.Index, cast)
 }
 
 func (s Spell)Description() string {
