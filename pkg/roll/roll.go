@@ -224,3 +224,18 @@ func Parse(s string) Roll {
 	
 	return ret
 }
+
+// Combine adds two rolls together, and returns a new roll. Currently
+// this only works if the dice size is the same.
+func (r1 Roll)Combine(r2 Roll) Roll {
+	new := r1
+
+	if new.DiceSize != r2.DiceSize {
+		return  Roll{Err:fmt.Errorf("can't combine %s with %s; different dice sizes", r1, r2)}
+	}
+
+	new.NumDice += r2.NumDice
+	new.Modifier += r2.Modifier
+
+	return new
+}

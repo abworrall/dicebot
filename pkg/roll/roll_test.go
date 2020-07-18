@@ -81,3 +81,30 @@ func TestRoll(t *testing.T) {
 		}
 	}
 }
+
+func TestCombine(t *testing.T) {
+	tests := []struct {
+		r1,r2    Roll
+		expected Roll
+	}{
+		{Roll{NumDice:1, DiceSize:6}, Roll{NumDice:4, DiceSize:6}, Roll{NumDice:5, DiceSize: 6}},
+		{Roll{NumDice:1, DiceSize:6, Modifier:1}, Roll{NumDice:4, DiceSize:6, Modifier:2},
+			Roll{NumDice:5, DiceSize:6, Modifier:3}},
+		{Roll{NumDice:1, DiceSize:6}, Roll{NumDice:4, DiceSize: 8}, Roll{Err: fmt.Errorf("asd")}},
+	}
+
+	for i,test := range tests {
+		actual := test.r1.Combine(test.r2)
+		fmt.Printf("Roll: %s\n", actual)
+		if test.expected.Err != nil {
+			if actual.Err == nil {
+				t.Errorf("[T%d]\nwanted err\ngot    %#v", i, actual)
+			}
+			continue
+		}
+
+		if !reflect.DeepEqual(actual, test.expected) {
+			t.Errorf("[T%d]\nwanted %#v\ngot    %#v", i, test.expected, actual)
+		}
+	}
+}
