@@ -1,0 +1,90 @@
+[
+    {
+        "index": "burning-hands",
+        "save": {
+            "attribute": "dex",
+            "effect": 0.5
+        },
+        "damage": {
+            "damage_dice": "3d6",
+            "damage_bonus": 0
+        },
+        "multi": {
+            "all_in_area": true
+        },
+        "per_higher_level": {
+            "extra_damage_dice": "1d6"
+        }
+    },
+    {
+        "index": "magic-missile",
+        "attack_roll": "",
+        "multi": {
+            "num_instances": 3
+        },
+        "damage": {
+            "damage_dice": "1d4",
+            "damage_bonus": 1
+        },
+        "per_higher_level": {
+            "extra_multi": true
+        },
+
+        "save": {}
+    },
+    {
+        "index": "thunderwave",
+        "attack_roll": "",
+        "damage": {
+            "damage_dice": "2d8",
+            "damage_bonus": 0
+        },
+        "multi": {
+            "all_in_area": true
+        },
+        "per_higher_level": {
+            "per_level_dice": "1d8"
+        },
+        "save": {
+            "attribute": "con",
+            "effect": 0.5
+        }
+    },
+    {
+        "index": "scorching-ray",
+        "attack_roll": "ranged",
+        "multi": {
+            "num_targets": 3
+        },
+        "damage": {
+            "damage_dice": "2d6",
+            "damage_bonus": 0
+        },
+        "per_higher_level": {
+            "extra_multi": true
+        }
+    },
+
+    {
+        "index": "guiding-bolt",
+        "attack_roll": "ranged",
+        "damage": {
+            "damage_dice": "4d6",
+            "damage_bonus": 0
+        },
+        "per_higher_level": {
+            "extra_damage_dice": "1d6"
+        }
+    },
+    {
+        "index": "inflict-wounds",
+        "attack_roll": "melee",
+        "damage": {
+            "damage_dice": "3d10",
+            "damage_bonus": 0
+        },
+        "per_higher_level": {
+            "extra_damage_dice": "1d10"
+        }
+    }
+]

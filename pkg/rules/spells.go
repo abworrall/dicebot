@@ -21,6 +21,8 @@ type Spell struct{
 	Subclasses []struct{
 		Name string `json:"name"`
 	} `json:"subclasses"`
+
+	SpellDamage // This is an extra, from a different file, populated in a second pass
 }
 func (s Spell)IsNil() bool { return s.Index == "" }
 

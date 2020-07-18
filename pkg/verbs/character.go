@@ -12,7 +12,7 @@ import(
 type Character struct{}
 
 func (c Character)Help() string {
-	return "[set FIELD VALUE], [list],then you can  [remove FIELD VALUE]"
+	return "[set FIELD VALUE], [list], [remove FIELD VALUE]"
 }
 
 func (c Character)Process(vc VerbContext, args []string) string {

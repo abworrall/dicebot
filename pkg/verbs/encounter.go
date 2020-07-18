@@ -162,7 +162,12 @@ func ParseAttackArgs(vc VerbContext, args []string) (Attack, error) {
 			switch args[1] {
 			case "advantage": attack.AttackSpec.WithAdvantage = true
 			case "disadvantage": attack.AttackSpec.WithDisadvantage = true
-			default: attack.AttackSpec.DamagerName = args[1]
+			default:
+				if rules.TheRules.IsSpell(args[1]) {
+					attack.AttackSpec.SpellName = args[1]
+				} else {
+					attack.AttackSpec.DamagerName = args[1]
+				}
 			}
 
 		case "tweak": // tweak hp -4

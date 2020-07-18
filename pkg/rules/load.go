@@ -11,12 +11,15 @@ import(
 // TODO: error handling
 func load(datadir string) Rules {
 	return Rules{
-		EquipmentList: loadEquipment(datadir + "/" + "5e-equipment.json"),
-		SpellList:     loadSpells   (datadir + "/" + "5e-spells.json"),
-		MonsterList:   loadMonsters (datadir + "/" + "5e-monsters.json"),
-		BuffList:      loadBuffs    (datadir + "/" + "5e-features.json"),
+		EquipmentList:   loadEquipment   (datadir + "/" + "5e-equipment.json"),
+		SpellList:       loadSpells      (datadir + "/" + "5e-spells.json"),
+		MonsterList:     loadMonsters    (datadir + "/" + "5e-monsters.json"),
+		BuffList:        loadBuffs       (datadir + "/" + "5e-features.json"),
+		SpellDamageList: loadSpellsDamage(datadir + "/" + "5e-spells-damage.json"),
 	}
 }
+
+// TODO: write this boilerplate once, with some type cleverness
 
 // LoadSpells opens a file that should be a ton of JSON objects that parse into spells
 func loadSpells(filename string) SpellList {
@@ -102,4 +105,31 @@ func loadBuffs(filename string) BuffList {
 	}
 	
 	return bl
+}
+
+// LoadSpells opens a file that should be a ton of JSON objects that parse into spells
+func loadSpellsDamage(filename string) SpellDamageList {
+	sl := map[string]SpellDamage{}
+
+	if jsonF,err := os.Open(filename); err == nil {
+		defer jsonF.Close()
+
+		file, _ := ioutil.ReadAll(jsonF)
+		spelldamages := []SpellDamage{}
+		err := json.Unmarshal(file, &spelldamages)
+		if err != nil {
+			log.Printf("%s, err: %v\n", filename, err)
+		}
+		
+		for _,spelldamage := range spelldamages {
+			sl[spelldamage.Index] = spelldamage
+			log.Printf("%s\n", spelldamage)
+			
+		}
+		log.Printf("%s, loaded %d objects\n", filename, len(sl))
+	} else {
+		log.Printf("open %s: %v\n", filename, err)
+	}
+	
+	return sl
 }
