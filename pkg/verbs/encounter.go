@@ -30,6 +30,7 @@ type Encounter struct{}
 //   attack TARGET TARGET2 TARGET3
 //   attack TARGET WEAPON [dis]advantage
 //   attack TARGET SPELL
+//   attack TARGET SPELL level 5  // which level to cast at
 //   attack TARGET 4d6+4
 
 //   attack ... by PLAYER    // one player playing another as an NPC
@@ -44,7 +45,7 @@ type Encounter struct{}
 
 // db attack [by MONSTER] TARGET1 [TARGET2 ...] {WEAPON,SPELL,DAMAGEROLL}] [dis]advantage] [tweak hp 400]
 
-func (e Encounter)Help() string { return "[join], [TARGET ...] {WEAPON,SPELL,ROLL} [advantage] [by PLAYER] [tweak {hp,ac} NN]" }
+func (e Encounter)Help() string { return "[join], [TARGET ...] {WEAPON,SPELL,ROLL} [advantage] [level NN] [by PLAYER] [tweak {hp,ac} NN]" }
 
 func (e Encounter)Process(vc VerbContext, args []string) string {
 	if len(args) < 1 { return vc.Encounter.String() }
@@ -142,7 +143,7 @@ type Attack struct {
 	DamageRoll     string  // ... or jump straight to a damage roll ...
 }
 
-// db attack [by MONSTER] TARGET1 [TARGET2 ...] {WEAPON,SPELL,DAMAGEROLL}] [dis]advantage] [tweak hp 400]
+// db attack [by MONSTER] TARGET1 [TARGET2 ...] {WEAPON,SPELL,DAMAGEROLL}] [dis]advantage] [level NN] [tweak hp 400]
 func ParseAttackArgs(vc VerbContext, args []string) (Attack, error) {
 	if len(args) == 0 {
 		return Attack{}, fmt.Errorf("not enough args at all")
@@ -166,6 +167,12 @@ func ParseAttackArgs(vc VerbContext, args []string) (Attack, error) {
 			}
 			args = args[1:] // Hacky way to keep arg eating in sync since this is a two-arg eat
 
+		} else if args[0] == "level" {
+			if len(args) < 2 { return Attack{}, fmt.Errorf("not enough args for level") }
+			lvl,_ := strconv.Atoi(args[1])
+			attack.AttackSpec.SpellCastingLevel = lvl
+			args = args[1:] // Hacky way to keep arg eating in sync since this is a two-arg eat
+			
 		} else if args[0] == "advantage" {
 			attack.AttackSpec.WithAdvantage = true
 

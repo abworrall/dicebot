@@ -140,8 +140,6 @@ func (e *Encounter)AttackWithSpell(spec AttackSpec) string {
 	}
 
 	str := ""
-
-	spec.SpellCastingLevel = 3
 	
 	// We apply spell effects in round-robin form over the targets,
 	// until we run out of instances, or it's non-stackable and we run
