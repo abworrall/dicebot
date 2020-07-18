@@ -31,6 +31,8 @@ type Roll struct {
 	Reason   string
 }
 
+func (r Roll)IsNil() bool { return r.NumDice == 0 && r.Modifier == 0 }
+
 func (r Roll)String() string {
 	s := fmt.Sprintf("%dd%d", r.NumDice, r.DiceSize)
 	if r.Modifier != 0 {

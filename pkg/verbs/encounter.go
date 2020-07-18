@@ -27,13 +27,12 @@ type Encounter struct{}
 // How players get involved:
 //   attack join
 //   attack TARGET
-//   attack TARGET with WEAPON
-//   attack TARGET do 4d6+4
-//   attack TARGET hp -17
-//   attack TARGET1,TARGET2,... do 4d6+4
+//   attack TARGET TARGET2 TARGET3
+//   attack TARGET WEAPON [dis]advantage
+//   attack TARGET SPELL
+//   attack TARGET 4d6+4
 
-//   attack TARGET by PLAYER    // one player playing another as an NPC
-
+//   attack ... by PLAYER    // one player playing another as an NPC
 
 // On the fly adjustments
 //   attack TARGET tweak FIELD VALUE
@@ -41,9 +40,11 @@ type Encounter struct{}
 //   attack TARGET tweak hp -7
 
 // How players get attacked:
-//   attack TARGET by MONSTER [with ACTION]
+//   attack TARGET by MONSTER [ACTION]
 
-func (e Encounter)Help() string { return "[join], [TARGET [with WEAPON][with advantage][do DAMAGEROLL][by PLAYER][tweak {hp,ac} NN]" }
+// db attack [by MONSTER] TARGET1 [TARGET2 ...] {WEAPON,SPELL,DAMAGEROLL}] [dis]advantage] [tweak hp 400]
+
+func (e Encounter)Help() string { return "[join], [TARGET ...] {WEAPON,SPELL,ROLL} [advantage] [by PLAYER] [tweak {hp,ac} NN]" }
 
 func (e Encounter)Process(vc VerbContext, args []string) string {
 	if len(args) < 1 { return vc.Encounter.String() }
@@ -141,37 +142,38 @@ type Attack struct {
 	DamageRoll     string  // ... or jump straight to a damage roll ...
 }
 
-// db attack TARGET [with WEAPON] [with [dis]advantage] [do DAMAGEROLL] [by MONSTER] [hp +-NN]
+// db attack [by MONSTER] TARGET1 [TARGET2 ...] {WEAPON,SPELL,DAMAGEROLL}] [dis]advantage] [tweak hp 400]
 func ParseAttackArgs(vc VerbContext, args []string) (Attack, error) {
 	if len(args) == 0 {
 		return Attack{}, fmt.Errorf("not enough args at all")
 	}
 
 	attack := Attack{AttackSpec: encounter.NewAttackSpec()}
-	targets := ""
-	attacker := vc.Character.Name
-	
-	targets, args = args[0], args[1:]
+	attackerName := vc.Character.Name
+	if c,exists := vc.Encounter.Lookup(attackerName); ! exists {
+		return Attack{}, fmt.Errorf("attacker combatant '%s' not found", attackerName)
+	} else {
+		attack.AttackSpec.Attacker = c
+	}	
 
-	for len(args) >= 2 {
-		switch args[0] {
-		case "by":   attacker = args[1]
-		case "do":   attack.DamageRoll = args[1]
-
-		case "with":
-			switch args[1] {
-			case "advantage": attack.AttackSpec.WithAdvantage = true
-			case "disadvantage": attack.AttackSpec.WithDisadvantage = true
-			default:
-				if rules.TheRules.IsSpell(args[1]) {
-					attack.AttackSpec.SpellName = args[1]
-				} else {
-					attack.AttackSpec.DamagerName = args[1]
-				}
+	// Keep shifting elements off the front of the slice until it is empty
+	for len(args) > 0 {
+		if args[0] == "by" {
+			if len(args) <2 { return Attack{}, fmt.Errorf("not enough args for 'by PLAYER'") }
+			if c,exists := vc.Encounter.Lookup(args[1]); ! exists {
+				return Attack{}, fmt.Errorf("attacker combatant '%s' not found", args[1])
+				attack.AttackSpec.Attacker = c
 			}
+			args = args[1:] // Hacky way to keep arg eating in sync since this is a two-arg eat
 
-		case "tweak": // tweak hp -4
-			if len(args) != 3 { return Attack{}, fmt.Errorf("not enough args for tweak") }
+		} else if args[0] == "advantage" {
+			attack.AttackSpec.WithAdvantage = true
+
+		} else if args[0] == "disadvantage" {
+			attack.AttackSpec.WithDisadvantage = true
+
+		} else if args[0] == "tweak" { // tweak hp -4
+			if len(args) < 3 { return Attack{}, fmt.Errorf("not enough args for tweak") }
 			mod,_ := strconv.Atoi(args[2])
 			switch args[1] {
 			case "hp": attack.TweakHPAmount = mod
@@ -179,38 +181,29 @@ func ParseAttackArgs(vc VerbContext, args []string) (Attack, error) {
 			default: 
 				return Attack{}, fmt.Errorf("you can't tweak '%s'", args[1])
 			}
-			// Hacky way to keep arg eating in sync since this is a three-arg eat
-			args = args[1:]
-		}
-		args = args[2:] // eat the two args we just processed, keep looping
-	}
+			args = args[2:] // Hacky way to keep arg eating in sync since this is a three-arg eat
+			
+		} else if target,exists := vc.Encounter.Lookup(args[0]); exists {
+			attack.AttackSpec.Targets = append(attack.AttackSpec.Targets, target)
 
-	if c,exists := vc.Encounter.Lookup(attacker); ! exists {
-		return Attack{}, fmt.Errorf("attacker combatant '%s' not found", attacker)
-	} else {
-		attack.AttackSpec.Attacker = c
-	}	
+		} else if rules.TheRules.IsSpell(args[0]) {
+			attack.AttackSpec.SpellName = args[0]
 
-	for _,target := range strings.Split(targets, ",") {
-		if c,exists := vc.Encounter.Lookup(target); ! exists {
-			return Attack{}, fmt.Errorf("target combatant '%s' not found", target)
+		} else if damager := attack.AttackSpec.Attacker.GetDamager(args[0]); damager != nil && damager.GetName() != "" {
+			attack.AttackSpec.DamagerName = args[0]
+
+		} else if dmgRoll := roll.Parse(args[0]); ! dmgRoll.IsNil() {
+			attack.DamageRoll = args[0]
+
 		} else {
-			attack.AttackSpec.Targets = append(attack.AttackSpec.Targets, c)
+			return Attack{}, fmt.Errorf("I got lost at '%s'", args[0])
 		}
+
+		args = args[1:] // shift off whatever we just processed
 	}
 
 	return attack, nil
 }
-
-/*
-type Attack struct {
-	encounter.AttackSpec   // Build up the attack spec ...
-
-	TweakHPAmount  int     // ... or tweak a value in the target ...
-	TweakACAmount  int
-	DamageRoll     string  // ... or jump straight to a damage roll ...
-}
-*/
 
 func (e Encounter)AttackTargets(vc VerbContext, attack Attack) string {
 	attacker := attack.AttackSpec.Attacker

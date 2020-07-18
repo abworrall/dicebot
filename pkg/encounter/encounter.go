@@ -145,7 +145,7 @@ func (e *Encounter)AttackWithSpell(spec AttackSpec) string {
 	
 	// We apply spell effects in round-robin form over the targets,
 	// until we run out of instances, or it's non-stackable and we run
-	// out of taregts.
+	// out of targets.
 	n,stackable := dmg.Count(spell.Level, spec.SpellCastingLevel)
 	for n>0 {
 		for _,target := range spec.Targets {
@@ -200,7 +200,6 @@ func (e *Encounter)AttackWithSpell(spec AttackSpec) string {
 	}
 
 	return str
-	//return fmt.Sprintf("OMG, %s casts %s at %s", spec.Attacker.GetName(), spec.SpellName, spec.Targets[0].GetName())
 }
 
 func buildHitRoll(spec AttackSpec, weapon Damager, target Combatter) roll.Roll {
