@@ -80,6 +80,9 @@ func Help() string {
 			str += fmt.Sprintf("- db %s %s\n", k, help)
 		}
 	}
+
+	str += "\nDetails at https://github.com/abworrall/dicebot/blob/master/README.md#verbs\n"
+
 	return str
 }
 

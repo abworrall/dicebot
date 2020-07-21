@@ -127,7 +127,7 @@ db attack wolf.2 wolf.3 4d6        # do 4d6 damage to two wolves
 db attack wolf.4 magic-missile     # spellcaster ? do it !
 
 # Cast at a higher level, with damage shared over multiple targets
-db attack wolf3 wolf.4 magic missile level 4
+db attack wolf3 wolf.4 magic-missile level 4
 
 ## Finally, you can tweak the HP and AC values as you see fit
 #
@@ -135,6 +135,10 @@ db attack player2 tweak hp +5     # player2 gets healed !
 db attack wolf.4  tweak hp -9     # the wolf takes some damage
 db attack player3 tweak ac -4     # player3's armor breaks :(
 ```
+
+The arguments can mostly be in any order, except you need the `by
+player` (or `by monster`) to come before the name of the
+weapon/action.
 
 One gotcha about magic - it will consume a spellslot from the main
 character data object, not the copy in the encounter.
