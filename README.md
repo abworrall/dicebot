@@ -119,7 +119,7 @@ db attack join                     # will assign an init score
 #
 db attack wolf.1                   # attack with default weapon
 db attack wolf.2 with shortbow     # use a different weapon
-db attacl wolf.3 advantage         # you have advantage !
+db attack wolf.3 advantage         # you have advantage !
 db attack wolf.2 wolf.3 4d6        # do 4d6 damage to two wolves
 
 ## Spellcasters can also attack
