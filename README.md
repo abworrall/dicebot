@@ -143,6 +143,18 @@ weapon/action.
 One gotcha about magic - it will consume a spellslot from the main
 character data object, not the copy in the encounter.
 
+### list
+
+You can create various named lists, which can keep count of items.
+```
+db list money  add 15 gp    # treasure !
+db list money  remove 5 gp  # lodging
+
+db list quests add  obtain mcguffin
+
+db list mylist add 100 arrows
+```
+
 ### rules
 
 The bot knows about some spells, equipment, character buffs, and
