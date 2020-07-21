@@ -43,9 +43,9 @@ type Encounter struct{}
 // How players get attacked:
 //   attack TARGET by MONSTER [ACTION]
 
-// db attack [by MONSTER] TARGET1 [TARGET2 ...] {WEAPON,SPELL,DAMAGEROLL}] [dis]advantage] [tweak hp 400]
+// db attack [by MONSTER] TARGET1 [TARGET2 ...] {WEAPON,SPELL,DAMAGEROLL}] [level NN] [{dis}advantage] [tweak hp 400]
 
-func (e Encounter)Help() string { return "[join], [TARGET ...] {WEAPON,SPELL,ROLL} [advantage] [level NN] [by PLAYER] [tweak {hp,ac} NN]" }
+func (e Encounter)Help() string { return "[join], [TARGET ...] [by PLAYER] {WEAPON,SPELL,ROLL} [advantage] [level NN] [tweak {hp,ac} NN]" }
 
 func (e Encounter)Process(vc VerbContext, args []string) string {
 	if len(args) < 1 { return vc.Encounter.String() }
@@ -255,7 +255,22 @@ func (e Encounter)AttackTargets(vc VerbContext, attack Attack) string {
 		return str
 	}
 
-	str := vc.Encounter.Attack(attack.AttackSpec) + "\n"
+	str := ""
+	
+	// If the user is casting a spell, use up the slot. This is kind of
+	// hideous, in that everything else affects copies of characters in
+	// the encounter, but this particular thing changes state in the
+	// main character ...
+	// TODO: 
+	if name := attack.AttackSpec.SpellName; name != "" {
+		if spellStr, err := vc.Character.CastSpell(name, attack.AttackSpec.SpellCastingLevel); err != nil {
+			return fmt.Sprintf("could not cast '%s': %v", name, err)
+		} else {
+			str += spellStr + "\n\n"
+		}
+	}
+
+	str += vc.Encounter.Attack(attack.AttackSpec) + "\n"
 
 	return str
 }

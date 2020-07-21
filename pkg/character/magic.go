@@ -50,3 +50,23 @@ func (c *Character)SpellsAlwaysMemorized() spells.Set {
 func (c *Character)GetCastableSpells() spells.Set {
 	return c.SpellsMemorized.UnionWith(c.SpellsAlwaysMemorized(), 2)
 }
+
+// CastSpell verifies the spellname, consumes a spell slot, and
+// returns a string with the spell description in. if `castingLevel`
+// is zero, it's taken as the base level of the spell.
+func (c *Character)CastSpell(name string, castingLevel int) (string, error) {
+
+	if err := spells.Cast(c.GetCastableSpells(), &c.Slots, name, castingLevel); err != nil {
+		return fmt.Sprintf("could not cast '%s': %v", name, err), err
+	}
+
+	sp := spells.Lookup(name)
+
+	str := fmt.Sprintf("%s casts '%s'", c.Name, name)
+	if castingLevel > sp.Level {
+		str += fmt.Sprintf(" at level %d!", castingLevel)
+	}
+
+	return str + "\n\n" + sp.Description() + "\n", nil
+}
+	

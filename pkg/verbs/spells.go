@@ -70,18 +70,8 @@ func (s Spells)Process(vc VerbContext, args []string) string {
 				level = v
 			}
 		}
-		if err := spells.Cast(vc.Character.GetCastableSpells(), &vc.Character.Slots, name, level); err != nil {
-			return fmt.Sprintf("could not cast '%s': %v", name, err)
-		} else {
-			sp := spells.Lookup(name)
-
-			str := fmt.Sprintf("%s casts '%s'", vc.User, name)
-			if level > sp.Level {
-				str += fmt.Sprintf(" at level %d!", level)
-			}
-			str += "\n\n" + sp.Description()
-			return str
-		}
+		str,_ := vc.Character.CastSpell(name, level)
+		return str
 
 	case "refresh":
 		vc.Character.Slots.Reset()
