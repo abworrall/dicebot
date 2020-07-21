@@ -29,14 +29,14 @@ DnD rules, to automate skill checks, attacks, etc.
 
 ## Verbs
 
-The main verb is `roll`, for rolling dice. There are some other verbs
-that help out with running an RPG in a chat group:
+The `help` verb dumps out some usage; and when a player first starts
+using the bot, they need to claim their character name.
+
 ```
 db help
 
-## Setup things
-#
 db bot claim strider       # First: claim a character name
+```
 
 ### char
 
@@ -61,7 +61,7 @@ Once it knows your class and level, it will list what buffs (class
 features) you have. For ones where you get to choose, you can add the
 buff by hand.
 
-No support for magic weapons/armor. Yet.
+No support for magic weapons/armor (yet).
 
 ### roll
 
