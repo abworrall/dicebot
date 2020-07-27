@@ -57,17 +57,18 @@ func (vc *VerbContext)Setup() {
 		log.Printf("[masquerading as %s]\n", vc.MasqueradeAs)
 	}
 	
-	if vc.User == "" { return }
-
-	vc.loadContextCharacter()
 	vc.loadContextEncounter()
+
+	if vc.User != "" {
+		vc.loadContextCharacter()
+	}
 }
 
 func (vc *VerbContext)Teardown() {
 	vc.maybeSaveContextCharacter()
 	vc.maybeSaveContextEncounter()
 	
-	if len(*vc.Events) > 0 {
+	if vc.Events != nil && len(*vc.Events) > 0 {
 		stateName := "history-state" // FIXME: need a better way to identify singleton state
 		h := NewHistory()
 
@@ -107,16 +108,13 @@ func (vc *VerbContext)maybeSaveContextCharacter() {
 func (vc *VerbContext)loadContextEncounter() {
 	e := encounter.NewEncounter()
 	vc.Encounter = &e
-	if vc.User == "" {
-		return
-	}
 	if err := vc.StateManager.ReadState(vc.Ctx, vc.encounterStateName(), &e); err != nil {
 		log.Printf("ReadState(%q): %v", vc.encounterStateName(), err)
 	}
 }
 func (vc *VerbContext)maybeSaveContextEncounter() {
-	// FIXME: ideally this would check for changes before writing the character
-	if vc.User == "" || vc.Encounter == nil {
+	// FIXME: ideally this would check for changes before writing
+	if vc.Encounter == nil {
 		return
 	}
 	if err := vc.StateManager.WriteState(vc.Ctx, vc.encounterStateName(), vc.Encounter); err != nil {

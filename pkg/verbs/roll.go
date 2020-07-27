@@ -12,7 +12,7 @@ import(
 type Roll struct{}
 
 func (r Roll)Help() string {
-	return "[4d6+3 >=8 withadvantage], [vs ATTR [NN] [withadvantage] [for BLAH]]"
+	return "[4d6+3 >=8 advantage], [vs ATTR [NN] [advantage] [for BLAH]]"
 }
 
 func (r Roll)Process(vc VerbContext, args []string) string {
@@ -34,7 +34,7 @@ func (r Roll)Process(vc VerbContext, args []string) string {
 // roll check STR DC [withadvantage,withdisadvantage] [for BLAH BLAH]
 func (r Roll)RollAbilityCheck(vc VerbContext, args []string) string {
 	if vc.Character == nil || len(args) == 0 {
-		return "we're not set up for that"
+		return "can't do ability check when I don't know who you are"
 	}
 
 	attrKind := character.ParseAttr(args[0])

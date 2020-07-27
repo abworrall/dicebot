@@ -16,8 +16,8 @@ func TestParse(t *testing.T) {
 		{"3d4+3",                      Roll{NumDice:3, DiceSize:4, Modifier:3} },
 		{"2d8+1 >=7",                  Roll{NumDice:2, DiceSize:8, Modifier:1, Target:7} },
 		{ "d20+4 >= 16 for fools",     Roll{NumDice:1, DiceSize:20, Modifier:4, Target:16, Reason:"fools"} },
-		{"1d20 >=6 withadvantage",     Roll{NumDice:1, DiceSize:20, Target:6, WithAdvantage:true} },
-		{"1d20 >=16 withdisadvantage", Roll{NumDice:1, DiceSize:20, Target:16, WithDisadvantage:true} },
+		{"1d20 >=6 advantage",         Roll{NumDice:1, DiceSize:20, Target:6, WithAdvantage:true} },
+		{"1d20 >=16 disadvantage",     Roll{NumDice:1, DiceSize:20, Target:16, WithDisadvantage:true} },
 		{"1d20 >=4 for a good reason", Roll{NumDice:1, DiceSize:20, Target:4, Reason:"a good reason"} },
 	}
 

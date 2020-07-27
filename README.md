@@ -16,7 +16,7 @@ gcloud app deploy ./app/dicebot --project=${YOUR_GCP_PROJECT}
 
 To get the bot running inside your LINE groups, you'll need to:
 * setup an official "LINE Business ID" account (instructions
-[here](https://respond.io/blog/the-ultimate-guide-to-line-for-business/#8crh6)
+[here](https://respond.io/blog/the-ultimate-guide-to-line-for-business/#8crh6))
 * get the channel secret for that account
 * get a long-lived channel token for that account
 * `mv ./pkg/config/myconfig.sample ./pkg/config/myconfig.go`
@@ -107,13 +107,13 @@ Monsters can use any of their named actions as attacks.
 ## Things the DM will do
 #
 db attack -reset                   # clear the slate
-db attack add orc.4 wolf.4         # add in some monsters (see `db rules monster`)
+db attack add orc.4 wolf.6         # add in ten monsters (see `db rules monster`)
 db attack strider by wolf.2 bite   # second wolf uses `bite` to attack player `strider`
 
 ## Things a player can do
 #
 db attack                          # review the state of things
-db attack join                     # will assign an init score
+db attack join                     # auto-rolls initiative
 
 ## Weapon attacks
 #
@@ -124,7 +124,7 @@ db attack wolf.2 wolf.3 4d6        # do 4d6 damage to two wolves
 
 ## Spellcasters can also attack
 #
-db attack wolf.4 magic-missile     # spellcaster ? do it !
+db attack wolf.4 magic-missile
 
 # Cast at a higher level, with damage shared over multiple targets
 db attack wolf3 wolf.4 magic-missile level 4
@@ -136,21 +136,22 @@ db attack wolf.4  tweak hp -9     # the wolf takes some damage
 db attack player3 tweak ac -4     # player3's armor breaks :(
 ```
 
-The arguments can mostly be in any order, except you need the `by
-player` (or `by monster`) to come before the name of the
+The arguments to `db attack` can mostly be in any order, except you
+need the `by player` (or `by monster`) to come before the name of the
 weapon/action.
 
-One gotcha about magic - it will consume a spellslot from the main
-character data object, not the copy in the encounter.
+One gotcha about casting spells in `db attack` - that *will* consume a
+spellslot from the main character data object, not the copy in the
+encounter.
 
 ### list
 
 You can create various named lists, which can keep count of items.
 ```
-db list money  add 15 gp    # treasure !
-db list money  remove 5 gp  # lodging
+db list money  add 15 gp    # treasure :)
+db list money  remove 5 gp  # costs :(
 
-db list quests add  obtain mcguffin
+db list quests add obtain mcguffin
 
 db list mylist add 100 arrows
 ```

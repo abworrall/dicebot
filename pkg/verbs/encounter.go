@@ -150,10 +150,11 @@ func ParseAttackArgs(vc VerbContext, args []string) (Attack, error) {
 	}
 
 	attack := Attack{AttackSpec: encounter.NewAttackSpec()}
-	attackerName := vc.Character.Name
-	if c,exists := vc.Encounter.Lookup(attackerName); ! exists {
-		return Attack{}, fmt.Errorf("attacker combatant '%s' not found", attackerName)
-	} else {
+	attackerName := "unknown"
+	if vc.Character != nil {
+		attackerName = vc.Character.Name
+	}
+	if c,exists := vc.Encounter.Lookup(attackerName); exists {
 		attack.AttackSpec.Attacker = c
 	}	
 
@@ -163,6 +164,7 @@ func ParseAttackArgs(vc VerbContext, args []string) (Attack, error) {
 			if len(args) <2 { return Attack{}, fmt.Errorf("not enough args for 'by PLAYER'") }
 			if c,exists := vc.Encounter.Lookup(args[1]); ! exists {
 				return Attack{}, fmt.Errorf("attacker combatant '%s' not found", args[1])
+			} else {
 				attack.AttackSpec.Attacker = c
 			}
 			args = args[1:] // Hacky way to keep arg eating in sync since this is a two-arg eat
@@ -196,17 +198,26 @@ func ParseAttackArgs(vc VerbContext, args []string) (Attack, error) {
 		} else if rules.TheRules.IsSpell(args[0]) {
 			attack.AttackSpec.SpellName = args[0]
 
-		} else if damager := attack.AttackSpec.Attacker.GetDamager(args[0]); damager != nil && damager.GetName() != "" {
-			attack.AttackSpec.DamagerName = args[0]
-
 		} else if dmgRoll := roll.Parse(args[0]); ! dmgRoll.IsNil() {
 			attack.DamageRoll = args[0]
 
 		} else {
-			return Attack{}, fmt.Errorf("I got lost at '%s'", args[0])
+			if attack.AttackSpec.Attacker == nil {
+				return Attack{}, fmt.Errorf("Thinking '%s' is a weapon, but couldn't identify attacker", args[0])
+
+			} else if damager := attack.AttackSpec.Attacker.GetDamager(args[0]); damager != nil && damager.GetName() != "" {
+				attack.AttackSpec.DamagerName = args[0]
+
+			} else {
+				return Attack{}, fmt.Errorf("I got lost at '%s'", args[0])
+			}
 		}
 
 		args = args[1:] // shift off whatever we just processed
+	}
+
+	if attack.AttackSpec.Attacker == nil {
+		return Attack{}, fmt.Errorf("couldn't identify attacker")
 	}
 
 	return attack, nil
