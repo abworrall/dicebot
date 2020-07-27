@@ -7,7 +7,7 @@ import(
 	"time"
 
 	"github.com/abworrall/dicebot/pkg/character"
-	"github.com/abworrall/dicebot/pkg/config"
+	// "github.com/abworrall/dicebot/pkg/config"
 	"github.com/abworrall/dicebot/pkg/encounter"
 	"github.com/abworrall/dicebot/pkg/state"
 )
@@ -52,7 +52,9 @@ func (vc *VerbContext)Setup() {
 
 	vc.User = bs.NameClaims[vc.ExternalUserId] // will be nil if they have no claim
 
-	if vc.MasqueradeAs != "" && vc.User == config.Get("adminuser") {
+	// Allow anyone to masquerade. Trust the users !
+	//if vc.MasqueradeAs != "" && vc.User == config.Get("adminuser") {
+	if vc.MasqueradeAs != "" {
 		vc.User = vc.MasqueradeAs
 		log.Printf("[masquerading as %s]\n", vc.MasqueradeAs)
 	}
