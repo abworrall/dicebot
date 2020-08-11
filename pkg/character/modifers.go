@@ -52,9 +52,9 @@ func (c *Character)GetArmorClass() (int, string) {
 		}
 
 		// This only applies when wearing armor
-		if c.HasBuff(BuffFighterFightingStyleDefense) {
+		if c.HasBuff(BuffFightingStyleDefense) {
 			ac += 1
-			frags = append(frags, fmt.Sprintf("{%s %+d}", BuffFighterFightingStyleDefense, 1))
+			frags = append(frags, fmt.Sprintf("{%s %+d}", BuffFightingStyleDefense, 1))
 		}
 		
 	} else {
@@ -123,10 +123,9 @@ func (c *Character)GetWeaponDamageModifier(w rules.Item) (int, string) {
 	mod, desc := c.GetWeaponAbilityModifier(w)
 	frags := []string{desc}
 
-	// The fighters Dueling buff gives a +2 damage bonus
-	if c.HasBuff(BuffFighterFightingStyleDueling) && w.WeaponRange == "Melee" {
-		// TODO: but only when only one weapon wielded - need to update character to have two current weapons
-		frags = append(frags, fmt.Sprintf("{%s %+d}", BuffFighterFightingStyleDueling, 2))
+	// The Dueling buffs give a +2 damage bonus
+	if w.WeaponRange == "Melee" && c.HasBuff(BuffFightingStyleDueling) {
+		frags = append(frags, fmt.Sprintf("{%s %+d}", BuffFightingStyleDueling, 2))
 		mod += 2
 	}
 	

@@ -123,7 +123,9 @@ func (c *Character)Summary() string {
 		subclass = "{" + c.Subclass + "}"
 	}
 
-	str := fmt.Sprintf("[%s] L%d %s%s, HP:%d/%d", c.Name, c.Level, c.Class, subclass, c.CurrHitpoints, c.MaxHitpoints)
+	ac,_ := c.GetArmorClass()
+
+	str := fmt.Sprintf("[%s] L%d %s%s, HP:%d/%d, AC:%d", c.Name, c.Level, c.Class, subclass, c.CurrHitpoints, c.MaxHitpoints, ac)
 
 	if c.IsSpellCaster() {
 		str += ", " + c.Slots.String()
@@ -131,8 +133,9 @@ func (c *Character)Summary() string {
 	if c.Armor != "" {
 		str += ", " + c.Armor
 	}
-	if c.CurrWeapon != "" {
-		str += ", " + c.CurrWeapon
+
+	for weapon,_ := range c.Weapons {
+		str += ", " + weapon
 	}
 
 	return str

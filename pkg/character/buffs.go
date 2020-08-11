@@ -12,8 +12,10 @@ const(
 	BuffClericDivineDomainSpells = "domain-spells-1"
 
 	BuffFighterChampionImprovedCritical = "improved-critical"
-	BuffFighterFightingStyleDefense = "fighter-fighting-style-defense"
-	BuffFighterFightingStyleDueling = "fighter-fighting-style-dueling"
+
+	// Fighting styles apply to multiple classes
+	BuffFightingStyleDefense = "fighting-style-defense"
+	BuffFightingStyleDueling = "fighting-style-dueling"
 )
 
 func (c *Character)AddBuff(b string) error {
