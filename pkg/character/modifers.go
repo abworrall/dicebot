@@ -9,6 +9,19 @@ import(
 
 // Lookup tables and logic for figuring out various level/class/proficiency based modifiers
 
+func XPAtLevel(lvl int) int {
+	vals := []int{
+		0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000,
+		85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000,
+	}
+	if lvl < 1 || lvl > 20 { return -1 }
+	return vals[lvl-1]
+}
+
+func (c *Character)NextLevelAt() int {
+	return XPAtLevel(c.Level + 1)
+}
+
 func AttrModifier(attrVal int) int {
 	if attrVal < 1 { attrVal = 1 }
 	if attrVal > 30 { attrVal = 30 }
@@ -25,6 +38,7 @@ func (c *Character)ProficiencyBonus() int {
 	// This table is pretty simple.
 	return (lvl-1)/4 + 2
 }
+
 
 // Compute a character's AC. The string returns a description.
 func (c *Character)GetArmorClass() (int, string) {

@@ -22,6 +22,8 @@ type Character struct {
 	MaxHitpoints int
 	CurrHitpoints int
 
+	XP int
+
 	Weapons map[string]int
 
 	Armor string	
@@ -65,6 +67,7 @@ DEX: %2d (%+d)
 PER: %2d (%+d)
 
 HP: (%d/%d)
+XP: %d/%d
 `,
 		c.Name,
 		c.Race,
@@ -77,7 +80,7 @@ HP: (%d/%d)
 		c.Cha, AttrModifier(c.Cha),
 		c.Dex, AttrModifier(c.Dex),
 		c.Per, AttrModifier(c.Per),
-		c.CurrHitpoints, c.MaxHitpoints)
+		c.CurrHitpoints, c.MaxHitpoints, c.XP, c.NextLevelAt())
 
 	s += "\n--{ Buffs }--\n"
 	for name,_ := range c.Buffs {

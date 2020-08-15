@@ -35,7 +35,7 @@ func (c Character)Process(vc VerbContext, args []string) string {
 
 	case "list":
 		return "[Useful fields: weapon, armor, shield]\n"+
-			"[Less useful fields: race, class, alignment, level, maxhp, buff, hp, str, int, wis, con, cha, dex per]"
+			"[Less useful fields: race, class, alignment, level, maxhp, buff, hp, xp, str, int, wis, con, cha, dex per]"
 
 	case "setstats":
 		if len(args) != 8 { return "`setstats 1 2 3 4 5 6 7`, plz" }
@@ -97,6 +97,7 @@ func (c Character)Set(vc VerbContext, k,v string) string {
 	case "level": vc.Character.Level = myatoi(v)
 	case "maxhp": vc.Character.MaxHitpoints = myatoi(v)
 	case "hp": vc.Character.CurrHitpoints = myatoi(v)
+	case "xp": vc.Character.XP = myatoi(v)
 
 	default: return fmt.Sprintf("I don't set '%s'", k)
 	}
