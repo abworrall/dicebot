@@ -9,6 +9,7 @@ import(
 	"time"
 
 	"github.com/abworrall/dicebot/pkg/bot"
+	"github.com/abworrall/dicebot/pkg/config"
 	"github.com/abworrall/dicebot/pkg/rules"
 	"github.com/abworrall/dicebot/pkg/verbs"
 )
@@ -17,6 +18,9 @@ func init() {
 	http.HandleFunc("/debug", debugHandler)
 	registerLineHandlerFor("/line", os.Getenv("GOOGLE_CLOUD_PROJECT"))
 
+	verbs.ChatHost = config.Get("chatbot.host")
+	verbs.ChatPort = config.Get("chatbot.port")
+	
 	rules.Init("./data") // Dir is relative to appengine module root, which is git repo root
 	log.Printf("(init has run)\n")
 }

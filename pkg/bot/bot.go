@@ -29,7 +29,10 @@ func (b Bot)ProcessLine(vc verbs.VerbContext, in string) string {
 	w := sanitizeLine(in)
 
 	if len(w) == 0 { return "" }
-	if _,exists := b.nicknames[w[0]]; !exists { return "" }
+	if _,exists := b.nicknames[w[0]]; !exists {
+		//verbs.NoteContext(vc, in)
+		return ""
+	}
 	if len(w) < 2 { return "Yo" }
 
 	return verbs.Act(vc, w[1], w[2:])

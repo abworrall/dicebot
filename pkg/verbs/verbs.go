@@ -27,6 +27,7 @@ func init() {
 	HandleVerb("list",    &Lists{})
 	HandleVerb("vow",     &Vows{})
 	HandleVerb("insult",  &Insult{})
+	HandleVerb("chat",    &Chatbot{})
 
 	// Oddball; has its own state (list of names), but reads/writes all characters
 	HandleVerb("party",   &Party{})
@@ -128,3 +129,14 @@ func Act(vc VerbContext, v string, args []string) string {
 	
 	return resp
 }
+
+/*func NoteContext(vc VerbContext, line string) {
+	fmt.Printf("Noting context %s !\n",line)
+	if _, exists := verbs["chat"]; exists {
+		if cb, ok := verbs["chat"].(*Chatbot); ok {
+			vc.Setup()
+			cb.AddContext(line)
+			vc.Teardown()
+		}
+	}
+}*/
